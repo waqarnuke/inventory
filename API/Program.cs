@@ -1,4 +1,5 @@
 using API.Errors;
+using API.Helper;
 using API.Middleware;
 using Core.Interface;
 using Infrastructure.Data;
@@ -26,6 +27,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
 //automapper config
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 //Use for validation errors 
 builder.Services.Configure<ApiBehaviorOptions>(option => 
 {
@@ -47,16 +49,25 @@ builder.Services.Configure<ApiBehaviorOptions>(option =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngularOrigins",
-    builder =>
+    options.AddPolicy("CoresPolicy",
+    Policy =>
     {
-        builder.WithOrigins(
-                            "http://localhost:4200"
-                            )
-                            .AllowAnyHeader()
-                            .AllowAnyMethod();
+        Policy.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
     });
 });
+
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("AllowAngularOrigins",
+//     builder =>
+//     {
+//         builder.WithOrigins(
+//                             "https://localhost:4200"
+//                             )
+//                             .AllowAnyHeader()
+//                             .AllowAnyMethod();
+//     });
+// });
 
 //builder.Services.Configure<CloudinarySetting>(builder.Configuration.GetSection("Cloudinary"));
 
@@ -68,8 +79,11 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 // Configure the HTTP request pipeline.
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -80,7 +94,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/Content"
 });
 
-app.UseCors("AllowAngularOrigins");
+app.UseCors("CoresPolicy");
 
 app.UseAuthorization();
 

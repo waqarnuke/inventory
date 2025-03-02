@@ -11,10 +11,29 @@ namespace Infrastructure.Data
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
-         public DbSet<Core.Entities.Photo> Photos { get; set; }
+        public DbSet<Core.Entities.Photo> Photos { get; set; }
+        public DbSet<Item> Items { get; set; }
+        public DbSet<Brand> Brands { get; set; }
+        public DbSet<Model> Models { get; set; }
+        public DbSet<Location> Locations { get; set; }
+        public DbSet<MobileNetwork> MobileNetworks { get; set; }
+        public DbSet<Storage> Storages { get; set; }
+        public DbSet<ItemType> ItemTypes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {   
-
+            modelBuilder.Entity<Brand>().HasData(
+                new Brand{Id=1, Name="Apple"},
+                new Brand{Id=2, Name="Samsung"},
+                new Brand{Id=3, Name="Huawei"},
+                new Brand{Id=4, Name="Anonymous"}
+            );
+            modelBuilder.Entity<Model>().HasData(
+                new Model{Id=1, Name="iPhone 11"},
+                new Model{Id=2, Name="Galaxy S20"},
+                new Model{Id=3, Name="P40 Pro"},
+                new Model{Id=4, Name="Anonymous"}
+            );
             modelBuilder.Entity<Category>().HasData(
                 new Category{Id=1, Name="Action",DisplayOrder=1},
                 new Category{Id=2, Name="History",DisplayOrder=2},
@@ -113,6 +132,50 @@ namespace Infrastructure.Data
                 new Core.Entities.Photo{Id = 5, FileName = "Action",PictureUrl = "/images/product/placeholder.jpg",IsMain = false},
                 new Core.Entities.Photo{Id = 6, FileName = "Action",PictureUrl = "/images/product/placeholder.jpg",IsMain = false}
             );
+        
+            modelBuilder.Entity<Item>().HasData(
+                new Item{Id=1, Title="iPhone 11", Description="I phone 11 test", BrandId=1,ModelId=1,Price=999,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=1,StorageId=1,ItemTypeId=1},  
+                new Item{Id=2, Title="Galaxy S20", Description="I Glaxy S20 test", BrandId=2,ModelId=2,Price=899,ImageUrl="/images/product/placeholder.jpg",LocationId=2,MobileNetworkId=2,StorageId=2,ItemTypeId=2},
+                new Item{Id=3, Title="P40 Pro",  Description="I P40 pro test", BrandId=3,ModelId=3,Price=799,ImageUrl="/images/product/placeholder.jpg",LocationId=3,MobileNetworkId=3,StorageId=3,ItemTypeId=1},
+                new Item{Id=4, Title="iPhone 11", Description="I phone 11 test", BrandId=1,ModelId=1,Price=999,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=1,StorageId=4,ItemTypeId=1},
+                new Item{Id=5, Title="Galaxy S20",Description="I Glaxy S20 test", BrandId=2,ModelId=2,Price=899,ImageUrl="/images/product/placeholder.jpg",LocationId=2,MobileNetworkId=2,StorageId=5,ItemTypeId=1},
+                new Item{Id=6, Title="P40 Pro", Description="I P40 pro test",BrandId=3,ModelId=3,Price=799,ImageUrl="/images/product/placeholder.jpg",LocationId=3,MobileNetworkId=3,StorageId=1,ItemTypeId=1},
+                new Item{Id=7, Title="Charger", Description="20 chagere", BrandId=4,ModelId=4,Price=10,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=8,StorageId=6,ItemTypeId=3},
+                new Item{Id=8, Title="Temper Glass", Description="20 Glass", BrandId=4,ModelId=4,Price=10,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=8,StorageId=6,ItemTypeId=3}
+            );
+
+            modelBuilder.Entity<Location>().HasData(
+                new Location{Id=1, Name="Humble"},
+                new Location{Id=2, Name="Kingwood"},
+                new Location{Id=3, Name="Atascocita"}
+            );
+
+            modelBuilder.Entity<MobileNetwork>().HasData(
+                new MobileNetwork{Id=1, Name="AT&T"},
+                new MobileNetwork{Id=2, Name="Verizon"},
+                new MobileNetwork{Id=3, Name="T-Mobile"},
+                new MobileNetwork{Id=4, Name="Sprint"},
+                new MobileNetwork{Id=5, Name="MetroPCS"},
+                new MobileNetwork{Id=6, Name="Cricket"},
+                new MobileNetwork{Id=7, Name="Boost Mobile"},
+                new MobileNetwork{Id=8, Name="Anonymous"}
+            );
+
+            modelBuilder.Entity<Storage>().HasData(
+                new Storage{Id=1, Name="32GB"},
+                new Storage{Id=2, Name="64GB"},
+                new Storage{Id=3, Name="256GB"},
+                new Storage{Id=4, Name="500GB"},
+                new Storage{Id=5, Name="1TB"},
+                new Storage{Id=6, Name="Anonymous"}
+            );
+
+            modelBuilder.Entity<ItemType>().HasData(
+                new Model{Id=1, Name="Single"},
+                new Model{Id=2, Name="Multiple"},
+                new Model{Id=3, Name="Anonymous"}
+            );
+            
         }
     }
 }
