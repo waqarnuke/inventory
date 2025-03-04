@@ -10,6 +10,8 @@ namespace Core.Interface
         ICategoryRepository categoryRepository {get;}
         IProductRepository productRepository {get;}
         IItemRepository ItemRepository {get;}
+        IBrandRepository BrandRepository {get;}
+
         Task<int> Save();
     }
 }
