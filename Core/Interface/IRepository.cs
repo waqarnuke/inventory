@@ -10,6 +10,7 @@ namespace Core.Interface
     public interface IRepository<T> where T :class
     {
         Task<IEnumerable<T>> GetAll(string? includeProperties = null);
+        Task<IReadOnlyList<T>> GetAllById(Expression<Func<T,bool>> filter, string? includeProperties = null);
         Task<T> Get(Expression<Func<T,bool>> filter, string? includeProperties = null);
         void Add(T entity);
         void Remove(T entity);

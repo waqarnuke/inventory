@@ -21,10 +21,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<StoreContext>(
     option => option.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
+
 //automapper config
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddAutoMapper(typeof(MappingProfile));

@@ -19,6 +19,7 @@ namespace Infrastructure.Data
         public DbSet<MobileNetwork> MobileNetworks { get; set; }
         public DbSet<Storage> Storages { get; set; }
         public DbSet<ItemType> ItemTypes { get; set; }
+        public DbSet<Image> Images { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {   

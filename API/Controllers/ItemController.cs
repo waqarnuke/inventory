@@ -1,3 +1,4 @@
+using API.Dtos;
 using API.Dtos.Item;
 using API.Errors;
 using AutoMapper;
@@ -11,10 +12,14 @@ namespace API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public ItemController(IUnitOfWork unitOfWork,IMapper mapper)
+        private readonly IImageService _imageService;
+        private readonly IImageRepository photorepo;
+        public ItemController(IUnitOfWork unitOfWork,IMapper mapper,IImageService imageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _imageService = imageService;
+
         }
 
         [HttpGet]
@@ -159,6 +164,62 @@ namespace API.Controllers
 
         }
 
+        [HttpPost("addphoto")]
+        public async Task<ActionResult<IReadOnlyList<PhotoDto>>> AddPhoto(IFormFile file,string userId)
+        {
+            var result = await _imageService.AddPhoto(file);
+            
+            if (result.Error != null) return BadRequest(result.Error.Message);
+
+            var photo = new Image
+            {
+                Url = result.SecureUrl.AbsoluteUri,
+                PublicId = result.PublicId,
+                UserId = userId
+            };
+
+            _unitOfWork.ImageRepository.Add(photo);
+
+            int resultSave = await _unitOfWork.Save();
+
+            if(resultSave > 0)
+            {
+                var getAllphoto = await _unitOfWork.ImageRepository.GetAllById(x => x.UserId == userId);
+                var response = getAllphoto.Select(x => new PhotoDto {
+                    Id = x.Id, 
+                    PublicId = x.PublicId,
+                    Url = x.Url,
+                    UserId = x.UserId
+                } ).ToList();
+
+                return response;
+            }
+
+            return BadRequest();
+        }
+
+        [HttpDelete("deletephoto/{photoId:int}")]
+        public async Task<ActionResult> DeletePhoto(int photoId)
+        {
+            var photo = await _unitOfWork.ImageRepository.Get(x => x.Id == photoId);
+
+            if (photo == null) return BadRequest("This photo cannot be deleted");
+
+            if (photo.PublicId != null)
+            {
+                var result = await _imageService.DeletePhoto(photo.PublicId);
+                if (result.Error != null) return BadRequest(result.Error.Message);
+            }
+
+            _unitOfWork.ImageRepository.Remove(photo);
+
+            if(await _unitOfWork.Save() > 0)
+            {
+                return NoContent();
+            }
+
+            return BadRequest("Problem deleting photo");
+        }
         private bool IsExists(int id)
         {
             return _unitOfWork.ItemRepository.IsExists(id);

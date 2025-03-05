@@ -8,12 +8,16 @@ namespace Infrastructure.Data
         public ICategoryRepository categoryRepository {   get; private set; }
         public IProductRepository productRepository {   get; private set; }
         public IItemRepository ItemRepository { get; private set; }
+
+        public IImageRepository ImageRepository { get; private set; }
+
         public UnitOfWork(StoreContext context)
         {
             _context = context;
             categoryRepository = new CategoryRepository(_context);
             productRepository = new ProductRepository(_context);
             ItemRepository = new ItemRepository(_context);
+            ImageRepository = new ImageRepository(_context);
         }
         public async Task<int> Save()
         {

@@ -38,7 +38,7 @@ namespace Infrastructure.Data
             }
             return query.FirstOrDefaultAsync(); 
         }
-
+        
         public async Task<IEnumerable<T>> GetAll(string? includeProperties = null)
         {
             //return _context.Set<T>(),ToListAsync();
@@ -51,6 +51,24 @@ namespace Infrastructure.Data
                     query = query.Include(includporp);
                 }
             }
+            return await query.ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<T>> GetAllById(Expression<Func<T,bool>> filter,string? includeProperties = null)
+        {
+            IQueryable<T> query = _dbSet;
+            if(filter !=null)
+            {
+                query = query.Where(filter);
+            }
+            if(!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach(var includeProp in includeProperties.Split(new char[] {','},StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);   
+                }
+            }
+
             return await query.ToListAsync();
         }
 
