@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using API.Dtos;
 using API.Dtos.Item;
 using API.Errors;
@@ -223,6 +224,22 @@ namespace API.Controllers
         private bool IsExists(int id)
         {
             return _unitOfWork.ItemRepository.IsExists(id);
+        }
+
+         [HttpPost("buy/{id}/{quantity}")]
+        public async Task<IActionResult> BuyProduct(int id, int quantity)
+        {
+            Item item = await _unitOfWork.ItemRepository.Get(x => x.Id == id);
+            if (item == null)
+                return NotFound("Product not found.");
+            
+            if (item.Stock < quantity)
+                return BadRequest("Not enough stock available.");
+            
+            item.Stock -= quantity;
+            _unitOfWork.ItemRepository.Add(item);
+            await _unitOfWork.Save();
+            return Ok("Purchase successful. Stock updated.");
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Infrastructure.Data
         public DbSet<Storage> Storages { get; set; }
         public DbSet<ItemType> ItemTypes { get; set; }
         public DbSet<Image> Images { get; set; }
-
+        public DbSet<Buying> Buyings { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {   
             modelBuilder.Entity<Brand>().HasData(
@@ -177,6 +177,11 @@ namespace Infrastructure.Data
                 new Model{Id=3, Name="Anonymous"}
             );
             
+            modelBuilder.Entity<Buying>().HasData(
+                new Buying{Id=1, ProductId=1, ProductName="iPhone 11", Quantity=0, PricePerUnit=999, TotalPrice=999, PaymentMethod="Cash", UserId=Guid.NewGuid()},
+                new Buying{Id=2, ProductId=2, ProductName="Galaxy S20", Quantity=0, PricePerUnit=899, TotalPrice=899, PaymentMethod="Card", UserId=Guid.NewGuid()},
+                new Buying{Id=3, ProductId=3, ProductName="P40 Pro", Quantity=0, PricePerUnit=799, TotalPrice=799, PaymentMethod="Cash", UserId=Guid.NewGuid()}
+            );
         }
     }
 }
