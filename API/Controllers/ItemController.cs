@@ -26,7 +26,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<ItemToReturnDto>>> GetItems()
         {
-            var items = await _unitOfWork.ItemRepository.GetAll(includeProperties: "Brand,Model,Location,MobileNetwork,Storage");
+            var items = await _unitOfWork.itemRepository.GetAll(includeProperties: "Brand,Model,Location,MobileNetwork,Storage");
             var itemsToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items);
             if (itemsToReturn == null) return NotFound(new ApiResponse(404));
 
@@ -36,7 +36,7 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ItemToReturnDto>> GetItem(int id)
         {
-            var item  = await _unitOfWork.ItemRepository.Get(p => p.Id == id,includeProperties:"Brand,Model,Location,MobileNetwork,Storage,ItemType");
+            var item  = await _unitOfWork.itemRepository.Get(p => p.Id == id,includeProperties:"Brand,Model,Location,MobileNetwork,Storage,ItemType");
 
             var itemToReturn = _mapper.Map<Item,ItemToReturnDto>(item);
 
@@ -56,7 +56,7 @@ namespace API.Controllers
             }
             else if((Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Single){
                 
-                var emiItem = await _unitOfWork.ItemRepository.Get(p => p.EMI == itemCreateDto.EMI);
+                var emiItem = await _unitOfWork.itemRepository.Get(p => p.EMI == itemCreateDto.EMI);
                 
                 if(emiItem != null) return BadRequest(new ApiResponse(400, "Item already exists"));
 
@@ -86,7 +86,7 @@ namespace API.Controllers
                 StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId
             };
             //product.ImageUrl = "images/products/placeholder.png";
-            _unitOfWork.ItemRepository.Add(item);
+            _unitOfWork.itemRepository.Add(item);
             
             var result = await _unitOfWork.Save();
             
@@ -111,7 +111,7 @@ namespace API.Controllers
             }
             else if((Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Single)
             {
-                var isDuplicateEmi = await _unitOfWork.ItemRepository.Get(p => p.EMI == itemCreateDto.EMI && p.Id != id);
+                var isDuplicateEmi = await _unitOfWork.itemRepository.Get(p => p.EMI == itemCreateDto.EMI && p.Id != id);
                 
                 if(isDuplicateEmi != null) return BadRequest(new ApiResponse(400, "Item already exists"));
                 
@@ -141,7 +141,7 @@ namespace API.Controllers
                 MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,
                 StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId
             };
-            _unitOfWork.ItemRepository.Update(item);
+            _unitOfWork.itemRepository.Update(item);
             
             var result = await _unitOfWork.Save();
             
@@ -153,9 +153,9 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteItem(int id)
         {
-            var item = await _unitOfWork.ItemRepository.Get(p => p.Id == id);
+            var item = await _unitOfWork.itemRepository.Get(p => p.Id == id);
 
-            _unitOfWork.ItemRepository.Remove(item);
+            _unitOfWork.itemRepository.Remove(item);
 
             var result = await _unitOfWork.Save();
 
@@ -223,13 +223,13 @@ namespace API.Controllers
         }
         private bool IsExists(int id)
         {
-            return _unitOfWork.ItemRepository.IsExists(id);
+            return _unitOfWork.itemRepository.IsExists(id);
         }
 
-         [HttpPost("buy/{id}/{quantity}")]
+        [HttpPost("buy/{id}/{quantity}")]
         public async Task<IActionResult> BuyProduct(int id, int quantity)
         {
-            Item item = await _unitOfWork.ItemRepository.Get(x => x.Id == id);
+            Item item = await _unitOfWork.itemRepository.Get(x => x.Id == id);
             if (item == null)
                 return NotFound("Product not found.");
             
@@ -237,7 +237,7 @@ namespace API.Controllers
                 return BadRequest("Not enough stock available.");
             
             item.Stock -= quantity;
-            _unitOfWork.ItemRepository.Add(item);
+            _unitOfWork.itemRepository.Add(item);
             await _unitOfWork.Save();
             return Ok("Purchase successful. Stock updated.");
         }

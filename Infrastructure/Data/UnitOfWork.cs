@@ -7,17 +7,23 @@ namespace Infrastructure.Data
         private readonly StoreContext _context;
         public ICategoryRepository categoryRepository {   get; private set; }
         public IProductRepository productRepository {   get; private set; }
-        public IItemRepository ItemRepository { get; private set; }
+        public IItemRepository itemRepository { get; private set; }
 
         public IImageRepository ImageRepository { get; private set; }
+
+        public IBuyingRepository buyingRepository { get; private set; }
+
+        public IRegisterRepository registerRepository { get; private set; }
 
         public UnitOfWork(StoreContext context)
         {
             _context = context;
             categoryRepository = new CategoryRepository(_context);
             productRepository = new ProductRepository(_context);
-            ItemRepository = new ItemRepository(_context);
+            itemRepository = new ItemRepository(_context);
             ImageRepository = new ImageRepository(_context);
+            buyingRepository = new BuyingRepository(_context);
+            registerRepository = new RegisterRepository(_context);
         }
         public async Task<int> Save()
         {

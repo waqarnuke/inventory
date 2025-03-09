@@ -1,20 +1,16 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Core.Entities;
+namespace API.Dtos.Buying;
 
-public class Buying : BaseEntity
+public class BuyingCreateDto
 {
-    public string? TransactionId { get; set; }
-    [Required]
     public int ItemId { get; set; }
+    public string Title { get; set; }
     public int Quantity { get; set; }
     public decimal? PricePerUnit { get; set; }
     public decimal? TotalPrice { get; set; }
     public string? PaymentMethod { get; set; } // "Cash" or "Card"
     public Guid? UserId { get; set; }
-
-    [ForeignKey("ItemId")]
-    public virtual Item Items { get; set; }
+    public string? TransactionId { get; set; }
 }

@@ -28,7 +28,6 @@ public class ItemCreateDto
         public string ImageUrl { get; set; }
         public string Color { get; set; }
         public string Condition { get; set; }
-        public Common.ItemType ItemType { get; set; }
         public int ItemTypeId { get; set; } 
         public int LocationId { get; set; }
         public int MobileNetworkId { get; set; }
