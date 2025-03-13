@@ -8,12 +8,14 @@ namespace Infrastructure.Data
         public ICategoryRepository categoryRepository {   get; private set; }
         public IProductRepository productRepository {   get; private set; }
         public IItemRepository itemRepository { get; private set; }
-
-        public IImageRepository ImageRepository { get; private set; }
-
+        public IImageRepository imageRepository { get; private set; }
         public IBuyingRepository buyingRepository { get; private set; }
-
         public IRegisterRepository registerRepository { get; private set; }
+        public IBrandRepository brandRepository {   get; private set; }
+        public ILocationRepository locationRepository {get; private set;}
+        public IMobileNetworkRepository mobileNetworkRepository {get; private set;}
+        public IStorageRepository storageRepository { get; private set;}
+        public IModelRepository modelRepository {get; private set;}
 
         public UnitOfWork(StoreContext context)
         {
@@ -21,7 +23,14 @@ namespace Infrastructure.Data
             categoryRepository = new CategoryRepository(_context);
             productRepository = new ProductRepository(_context);
             itemRepository = new ItemRepository(_context);
-            ImageRepository = new ImageRepository(_context);
+            
+            brandRepository = new BrandRepository(_context);
+            mobileNetworkRepository = new MobileNetworkRepository(_context);
+            storageRepository = new StorageRepository(_context);
+            modelRepository = new ModelRepository(_context);
+            locationRepository = new LocationRepository(_context);
+            
+            imageRepository = new ImageRepository(_context);
             buyingRepository = new BuyingRepository(_context);
             registerRepository = new RegisterRepository(_context);
         }
