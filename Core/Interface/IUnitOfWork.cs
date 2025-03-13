@@ -9,8 +9,13 @@ namespace Core.Interface
     {
         ICategoryRepository categoryRepository {get;}
         IProductRepository productRepository {get;}
+        IModelRepository ModelRepository {get;}
         IItemRepository ItemRepository {get;}
         IBrandRepository BrandRepository {get;}
+        IMobileNetworkRepository mobileNetworkRepository{get;}
+        IStorageRepository StorageRepository{ get;}
+
+        ILocationRepository locationRepository {get;}
 
         Task<int> Save();
     }
