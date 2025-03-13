@@ -7,10 +7,8 @@ namespace Core.Entities
     {
         [Key]
         public int Id { get; set; } 
-        [Required]
         [Column(TypeName = "nvarchar(100)")]
         public string Name { get; set; }
 
-        public virtual ICollection<Product> Products { get; set; }
     }
 }

@@ -10,9 +10,15 @@ namespace Core.Interface
         ICategoryRepository categoryRepository {get;}
         IProductRepository productRepository {get;}
         IItemRepository itemRepository {get;}
-        IImageRepository ImageRepository {get;}
+        IImageRepository imageRepository {get;}
         IBuyingRepository buyingRepository {get;}
         IRegisterRepository registerRepository {get;}
+        IModelRepository modelRepository {get;}
+        IBrandRepository brandRepository {get;}
+        IMobileNetworkRepository mobileNetworkRepository{get;}
+        IStorageRepository storageRepository{ get;}
+        ILocationRepository locationRepository {get;}
+
         Task<int> Save();
     }
 }

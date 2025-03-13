@@ -179,13 +179,13 @@ namespace API.Controllers
                 UserId = userId
             };
 
-            _unitOfWork.ImageRepository.Add(photo);
+            _unitOfWork.imageRepository.Add(photo);
 
             int resultSave = await _unitOfWork.Save();
 
             if(resultSave > 0)
             {
-                var getAllphoto = await _unitOfWork.ImageRepository.GetAllById(x => x.UserId == userId);
+                var getAllphoto = await _unitOfWork.imageRepository.GetAllById(x => x.UserId == userId);
                 var response = getAllphoto.Select(x => new PhotoDto {
                     Id = x.Id, 
                     PublicId = x.PublicId,
@@ -202,7 +202,7 @@ namespace API.Controllers
         [HttpDelete("deletephoto/{photoId:int}")]
         public async Task<ActionResult> DeletePhoto(int photoId)
         {
-            var photo = await _unitOfWork.ImageRepository.Get(x => x.Id == photoId);
+            var photo = await _unitOfWork.imageRepository.Get(x => x.Id == photoId);
 
             if (photo == null) return BadRequest("This photo cannot be deleted");
 
@@ -212,7 +212,7 @@ namespace API.Controllers
                 if (result.Error != null) return BadRequest(result.Error.Message);
             }
 
-            _unitOfWork.ImageRepository.Remove(photo);
+            _unitOfWork.imageRepository.Remove(photo);
 
             if(await _unitOfWork.Save() > 0)
             {
