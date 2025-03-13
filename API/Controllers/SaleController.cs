@@ -1,0 +1,117 @@
+using API.Dtos.Sale;
+using API.Errors;
+using Core.Entities;
+using Core.Interface;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace API.Controllers
+{
+    public class SaleController : BaseApiController
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public SaleController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<Sale>>> GetItems()
+        {
+            var sale = await _unitOfWork.saleRepository.GetAll();
+
+            if (sale == null) return NotFound(new ApiResponse(404));
+
+            return Ok(sale);
+        }
+
+        [HttpPost("add-to-cart")]
+        public async Task<IActionResult> AddToCart([FromBody] SaleCreateDto newSale)
+        {
+            if (newSale.Quantity <= 0 || newSale.PricePerUnit <= 0)
+                return BadRequest("Invalid quantity or price.");
+
+            // Generate Transaction ID if not provided
+            if (string.IsNullOrEmpty(newSale.TransactionId))
+                newSale.TransactionId = Guid.NewGuid().ToString();
+
+            // Check if product exists and has enough stock
+            var product = await _unitOfWork.itemRepository.Get(x => x.Title.ToLower() == newSale.Title.ToLower());
+            if (product == null || product.Stock < newSale.Quantity)
+                return BadRequest($"Not enough stock available for {newSale.Title}.");
+
+            // Calculate Total Price
+            newSale.TotalPrice = newSale.Quantity * newSale.PricePerUnit;
+
+            var sale = new Sale
+            {
+                UserId = newSale.UserId,
+                ItemId = product.Id,
+                Quantity = newSale.Quantity,
+                PricePerUnit = newSale.PricePerUnit,
+                TotalPrice = newSale.Quantity * newSale.PricePerUnit,
+                TransactionId = newSale.TransactionId,
+                PaymentMethod = newSale.PaymentMethod,
+                LocationId = newSale.LocationId
+            };
+            // Temporarily store item in cart
+            _unitOfWork.saleRepository.Add(sale);
+            await _unitOfWork.Save();
+
+            return Ok(new { Message = "Item added to cart", TransactionId = newSale.TransactionId });
+        }
+
+        [HttpPost("confirm-sale")]
+        public async Task<IActionResult> ConfirmSale(string TransactionId,string PaymentMethod)
+        {
+            var cartItems = await _unitOfWork.saleRepository.GetAllById(s => s.TransactionId == TransactionId);
+
+            if (!cartItems.Any())
+                return BadRequest("Cart is empty or transaction ID is invalid.");
+
+            // Calculate total amount
+            decimal totalAmount = cartItems.Sum(item => item.TotalPrice);
+
+            // Get register balance
+            var getRegister = await _unitOfWork.registerRepository.GetAll() ;
+            Register register = getRegister.FirstOrDefault();
+            if (register == null)
+            {
+                return BadRequest("Register not found.");
+            }
+
+            // Deduct stock from inventory & update register
+            foreach (var item in cartItems)
+            {
+                var product = await _unitOfWork.itemRepository.Get(p => p.Id == item.ItemId);
+                if (product == null || product.Stock < item.Quantity)
+                    return BadRequest($"Stock insufficient for {item.ProductName}.");
+
+                // Reduce stock from inventory
+                product.Stock -= item.Quantity;
+                _unitOfWork.itemRepository.Update(product);
+            }
+
+            // Add amount to register based on payment method
+            if (PaymentMethod == "Cash")
+            {
+                register.CashBalance += totalAmount;
+            }
+            else if (PaymentMethod == "Card")
+            {
+                register.CardBalance += totalAmount;
+            }
+            else
+            {
+                return BadRequest("Invalid Payment Method.");
+            }
+            int result = await _unitOfWork.Save();
+            // Save updated register balance
+            if(result  <= 0) return  BadRequest(new ApiResponse(400, "Problem in creating selling item"));
+
+            return Ok(new { Message = "Sale confirmed successfully", TotalAmount = totalAmount });
+        }
+
+    }
+}

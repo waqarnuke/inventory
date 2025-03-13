@@ -16,6 +16,7 @@ namespace Infrastructure.Data
         public IMobileNetworkRepository mobileNetworkRepository {get; private set;}
         public IStorageRepository storageRepository { get; private set;}
         public IModelRepository modelRepository {get; private set;}
+        public ISaleRepository saleRepository {get; private set;}
 
         public UnitOfWork(StoreContext context)
         {
@@ -33,6 +34,7 @@ namespace Infrastructure.Data
             imageRepository = new ImageRepository(_context);
             buyingRepository = new BuyingRepository(_context);
             registerRepository = new RegisterRepository(_context);
+            saleRepository = new SaleRepository(_context);
         }
         public async Task<int> Save()
         {
