@@ -22,6 +22,7 @@ namespace Infrastructure.Data
         public DbSet<Image> Images { get; set; }
         public DbSet<Buying> Buyings { get; set; }
         public DbSet<Register> Registers { get; set; }
+        public DbSet<Sale> Sales { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {   
             modelBuilder.Entity<Brand>().HasData(
@@ -186,6 +187,12 @@ namespace Infrastructure.Data
 
             modelBuilder.Entity<Register>().HasData(
                 new Register{Id=1, CardBalance=10000,CashBalance=100000}
+            );
+
+            modelBuilder.Entity<Sale>().HasData(
+                new Sale{Id=1, ItemId=1, Quantity=0, PricePerUnit=999, TotalPrice=999, PaymentMethod="Cash", UserId=Guid.NewGuid(),LocationId=1},
+                new Sale{Id=2, ItemId=2, Quantity=0, PricePerUnit=899, TotalPrice=899, PaymentMethod="Card", UserId=Guid.NewGuid(),LocationId=2},
+                new Sale{Id=3, ItemId=3, Quantity=0, PricePerUnit=799, TotalPrice=799, PaymentMethod="Cash", UserId=Guid.NewGuid(),LocationId=3}
             );
         }
     }

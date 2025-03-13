@@ -56,7 +56,8 @@ namespace API.Controllers
                 PricePerUnit = newPurchase.PricePerUnit,
                 TotalPrice = newPurchase.Quantity * newPurchase.PricePerUnit,
                 TransactionId = newPurchase.TransactionId,
-                PaymentMethod = newPurchase.PaymentMethod
+                PaymentMethod = newPurchase.PaymentMethod,
+                LocationId = newPurchase.LocationId
             };
             // Save item to Buying Table (Temporary)
             _unitOfWork.buyingRepository.Add(buying);

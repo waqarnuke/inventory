@@ -18,6 +18,7 @@ namespace Core.Interface
         IMobileNetworkRepository mobileNetworkRepository{get;}
         IStorageRepository storageRepository{ get;}
         ILocationRepository locationRepository {get;}
+        ISaleRepository saleRepository {get;}
 
         Task<int> Save();
     }
