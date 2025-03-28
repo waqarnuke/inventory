@@ -32,7 +32,7 @@ public class ImageService : IImageService
                 Transformation = new Transformation().Height(500).Width(500).Crop("fill")
             };
             
-            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            var uploadResult = await _cloudinary .UploadAsync(uploadParams);
 
             if(uploadResult.Error !=null)
             {

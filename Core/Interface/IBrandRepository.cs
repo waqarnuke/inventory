@@ -7,8 +7,8 @@ using Core.Entities;
 namespace Core.Interface
 {
     public interface IBrandRepository :IRepository<Brand>
-{
-    void Update(Brand brand);
-    bool IsExists(int id);
-}
+    {
+        void Update(Brand brand);
+        bool IsExists(int id);
+    }
 }

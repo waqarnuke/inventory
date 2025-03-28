@@ -23,8 +23,15 @@ namespace Infrastructure.Data
         public DbSet<Buying> Buyings { get; set; }
         public DbSet<Register> Registers { get; set; }
         public DbSet<Sale> Sales { get; set; }
+        public DbSet<Supplier> Suppliers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {   
+            // modelBuilder.Entity<Item>()
+            //     .HasMany(i => i.Images)
+            //     .WithOne()
+            //     .HasForeignKey(i => i.ItemId)
+            //     .OnDelete(DeleteBehavior.Cascade); 
+
             modelBuilder.Entity<Brand>().HasData(
                 new Brand{Id=1, Name="Apple"},
                 new Brand{Id=2, Name="Samsung"},
@@ -193,6 +200,18 @@ namespace Infrastructure.Data
                 new Sale{Id=1, ItemId=1, Quantity=0, PricePerUnit=999, TotalPrice=999, PaymentMethod="Cash", UserId=Guid.NewGuid(),LocationId=1},
                 new Sale{Id=2, ItemId=2, Quantity=0, PricePerUnit=899, TotalPrice=899, PaymentMethod="Card", UserId=Guid.NewGuid(),LocationId=2},
                 new Sale{Id=3, ItemId=3, Quantity=0, PricePerUnit=799, TotalPrice=799, PaymentMethod="Cash", UserId=Guid.NewGuid(),LocationId=3}
+            );
+
+            modelBuilder.Entity<Image>().HasData(
+            new Image { Id = 1, ItemId = 1, Url = "iphone1.jpg" },
+            new Image { Id = 2, ItemId = 1, Url = "iphone2.jpg" }
+
+            );
+
+            modelBuilder.Entity<Supplier>().HasData(
+                new Supplier{Id=1, CompanyName="Abc", ContactPerson="346-111-2222", Email="abc@gmail.com", Address="331"},
+                new Supplier{Id=2, CompanyName="xyz", ContactPerson="346-111-3333", Email="xyz@gmail.com", Address="332"},
+                new Supplier{Id=3, CompanyName="aaa", ContactPerson="346-111-4444", Email="aaa@gmail.com", Address="333"}
             );
         }
     }

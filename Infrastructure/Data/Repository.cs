@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Core.Common;
 using Core.Interface;
 using Microsoft.EntityFrameworkCore;
 
@@ -90,6 +91,56 @@ namespace Infrastructure.Data
         public async Task<IReadOnlyList<T>> ListAllAsync()
         {
             return await _context.Set<T>().ToListAsync();  
+        }
+
+        public async Task<PagedResult<T>> GetPagination(int index, int size, string orderBy = null, bool ascending = true, 
+                                                        string includeProperties = null,Expression<Func<T,bool>> filter = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            // 🔎 Apply filter (searching)
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            // 🧮 Total count BEFORE pagination
+            int totalCount = await query.CountAsync();
+
+            if(!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach(var includporp in includeProperties
+                    .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includporp);
+                }
+            }
+
+            // 🔃 Sorting
+            if (!string.IsNullOrEmpty(orderBy))
+            {
+                var parameter = Expression.Parameter(typeof(T), "x");
+                var property = Expression.Property(parameter, orderBy);
+                var lambda = Expression.Lambda(property, parameter);
+
+                string methodName = ascending ? "OrderBy" : "OrderByDescending";
+                var resultExp = Expression.Call(typeof(Queryable), methodName,
+                    new Type[] { typeof(T), property.Type },
+                    query.Expression, Expression.Quote(lambda));
+
+                query = query.Provider.CreateQuery<T>(resultExp);
+            }
+
+            // 📄 Pagination
+            var items = await query.Skip(index * size).Take(size).ToListAsync();
+
+            return new PagedResult<T>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageIndex = index,
+                PageSize = size
+            };
         }
     }
 }

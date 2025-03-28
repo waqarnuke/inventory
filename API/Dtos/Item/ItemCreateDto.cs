@@ -31,5 +31,6 @@ public class ItemCreateDto
         public int ItemTypeId { get; set; } 
         public int LocationId { get; set; }
         public int MobileNetworkId { get; set; }
-        public int StorageId { get; set; }            
+        public int StorageId { get; set; } 
+        public int SupplierId { get; set; }            
 }
