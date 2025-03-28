@@ -47,5 +47,9 @@ namespace Core.Entities
         public int? StorageId { get; set; }
         [ForeignKey("StorageId")]
         public virtual Storage Storage { get; set; }
+        [ForeignKey("SupplierId")]
+        public int? SupplierId { get; set; }
+        public virtual Supplier Supplier { get; set; }
+        public ICollection<Core.Entities.Image> Images { get; set; } = new List<Core.Entities.Image>();
     }
 }

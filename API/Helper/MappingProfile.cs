@@ -26,6 +26,8 @@ namespace API.Helper
                 .ForMember(c => c.MobileNetwork, o => o.MapFrom(s => s.MobileNetwork.Name))
                 .ForMember(c => c.Storage, o => o.MapFrom(s => s.Storage.Name))
                 .ForMember(c => c.ItemType, o => o.MapFrom(s => s.ItemType.Name));
+
+            CreateMap<Image, ImageDto>();    
         }
     }
 }

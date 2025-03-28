@@ -12,17 +12,18 @@ namespace Infrastructure.Data
         private readonly StoreContext _context;
         public BrandRepository(StoreContext context) : base(context)
         {
-             _context = context;
+            _context = context;
 
         }
 
         public bool IsExists(int id)
         {
-           return _context.Brands.Any(x => x.Id == id);        }
+            return _context.Brands.Any(x => x.Id == id);        
+        }
 
         public void Update(Brand brand)
         {
-           _context.Brands.Update(brand);
+            _context.Brands.Update(brand);
         }
     }
 }

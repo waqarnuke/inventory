@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using API.Dtos;
 using API.Dtos.Item;
@@ -26,8 +27,10 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<ItemToReturnDto>>> GetItems()
         {
-            var items = await _unitOfWork.itemRepository.GetAll(includeProperties: "Brand,Model,Location,MobileNetwork,Storage");
+            var items = await _unitOfWork.itemRepository.GetAll(includeProperties: "Brand,Model,Location,MobileNetwork,Storage,Images");
             var itemsToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items);
+            //var itemsToReturn = _mapper.Map<IList<Item>, IList<ItemToReturnDto>>(items);
+            // var itemsToReturn = _mapper.Map<IEnumerable<Image>, IEnumerable<ImageDto>>;
             if (itemsToReturn == null) return NotFound(new ApiResponse(404));
 
             return Ok(itemsToReturn);
@@ -36,9 +39,10 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ItemToReturnDto>> GetItem(int id)
         {
-            var item  = await _unitOfWork.itemRepository.Get(p => p.Id == id,includeProperties:"Brand,Model,Location,MobileNetwork,Storage,ItemType");
+            var item  = await _unitOfWork.itemRepository.Get(p => p.Id == id,includeProperties:"Brand,Model,Location,MobileNetwork,Storage,ItemType,Images");
 
             var itemToReturn = _mapper.Map<Item,ItemToReturnDto>(item);
+            //var imageToReturn = _mapper.Map<ICollection<Image>,ICollection<ImageDto>>(item.Images);
 
             if (itemToReturn == null) return NotFound(new ApiResponse(404));
 
@@ -83,7 +87,8 @@ namespace API.Controllers
                 ItemTypeId = itemCreateDto.ItemTypeId == 0 ? null : itemCreateDto.ItemTypeId,
                 LocationId = itemCreateDto.LocationId == 0 ? null : itemCreateDto.LocationId,
                 MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,
-                StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId
+                StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId,
+                SupplierId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.SupplierId
             };
             //product.ImageUrl = "images/products/placeholder.png";
             _unitOfWork.itemRepository.Add(item);
@@ -139,7 +144,8 @@ namespace API.Controllers
                 ItemTypeId = itemCreateDto.ItemTypeId == 0 ? null : itemCreateDto.ItemTypeId,
                 LocationId = itemCreateDto.LocationId == 0 ? null : itemCreateDto.LocationId,
                 MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,
-                StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId
+                StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId,
+                SupplierId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.SupplierId
             };
             _unitOfWork.itemRepository.Update(item);
             
@@ -165,10 +171,13 @@ namespace API.Controllers
 
         }
 
-        [HttpPost("addphoto")]
-        public async Task<ActionResult<IReadOnlyList<PhotoDto>>> AddPhoto(IFormFile file,string userId)
+        [HttpPost("upload-images")]
+        public async Task<ActionResult<IReadOnlyList<PhotoDto>>> AddPhoto([FromForm] int itemId, [FromForm] List<IFormFile> images) //IFormFile file,int id
         {
-            var result = await _imageService.AddPhoto(file);
+            var imageResult = images.FirstOrDefault();
+            if(imageResult == null) return BadRequest("No image found");
+
+            var result = await _imageService.AddPhoto(imageResult);
             
             if (result.Error != null) return BadRequest(result.Error.Message);
 
@@ -176,7 +185,7 @@ namespace API.Controllers
             {
                 Url = result.SecureUrl.AbsoluteUri,
                 PublicId = result.PublicId,
-                UserId = userId
+                ItemId = itemId
             };
 
             _unitOfWork.imageRepository.Add(photo);
@@ -185,12 +194,13 @@ namespace API.Controllers
 
             if(resultSave > 0)
             {
-                var getAllphoto = await _unitOfWork.imageRepository.GetAllById(x => x.UserId == userId);
+                var getAllphoto = await _unitOfWork.imageRepository.GetAllById(x => x.ItemId == itemId);
                 var response = getAllphoto.Select(x => new PhotoDto {
                     Id = x.Id, 
                     PublicId = x.PublicId,
                     Url = x.Url,
-                    UserId = x.UserId
+                    UserId = x.UserId,
+                    ItemId = x.ItemId.Value
                 } ).ToList();
 
                 return response;
@@ -241,5 +251,34 @@ namespace API.Controllers
             await _unitOfWork.Save();
             return Ok("Purchase successful. Stock updated.");
         }
+    
+        [HttpGet("getPaginatedItems")]
+        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> GetPaginatedItems(int index, int size, string orderBy = null, bool ascending = true,string search = null)
+        {
+            // ✅ Optional filter setup
+            Expression<Func<Item, bool>> filter = null;
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                filter = x => x.Title.Contains(search);
+            }
+           //filter: x => x.Title.Contains(filter) || x.Description.Contains(filter) || x.Brand.Name.Contains(filter) || x.Model.Name.Contains(filter) || x.Location.Name.Contains(filter) || x.MobileNetwork.Name.Contains(filter) || x.Storage.Name.Contains(filter)
+            var items = await _unitOfWork.itemRepository.GetPagination(index, size, orderBy, ascending, 
+                                                                        includeProperties: "Brand,Model,Location,MobileNetwork,Storage",
+                                                                        filter: filter);
+            var itemsToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items.Items);
+            
+            if (itemsToReturn == null) return NotFound(new ApiResponse(404));
+
+            var result = new PagedResultDto<ItemToReturnDto>
+            {
+                Data = itemsToReturn,
+                TotalCount = items.TotalCount,
+                PageSize = items.PageSize,
+                PageIndex = items.PageIndex,
+            };
+
+            return Ok(result);
+        }
+
     }
 }

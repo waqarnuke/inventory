@@ -29,4 +29,5 @@ public class ItemToReturnDto
         public string MobileNetwork { get; set; }
         public int StorageId { get; set; }
         public string Storage { get; set; }    
+        public ICollection<ImageDto> Images { get; set; } 
 }
