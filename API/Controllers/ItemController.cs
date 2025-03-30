@@ -88,7 +88,7 @@ namespace API.Controllers
                 LocationId = itemCreateDto.LocationId == 0 ? null : itemCreateDto.LocationId,
                 MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,
                 StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId,
-                SupplierId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.SupplierId
+                SupplierId = itemCreateDto.SupplierId == 0 ? null : itemCreateDto.SupplierId
             };
             //product.ImageUrl = "images/products/placeholder.png";
             _unitOfWork.itemRepository.Add(item);
@@ -145,7 +145,7 @@ namespace API.Controllers
                 LocationId = itemCreateDto.LocationId == 0 ? null : itemCreateDto.LocationId,
                 MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,
                 StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId,
-                SupplierId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.SupplierId
+                SupplierId = itemCreateDto.SupplierId == 0 ? null : itemCreateDto.SupplierId
             };
             _unitOfWork.itemRepository.Update(item);
             

@@ -30,4 +30,5 @@ public class ItemToReturnDto
         public int StorageId { get; set; }
         public string Storage { get; set; }    
         public ICollection<ImageDto> Images { get; set; } 
+        public int SupplierId { get; set; }
 }
