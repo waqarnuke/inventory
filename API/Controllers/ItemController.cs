@@ -59,8 +59,6 @@ namespace API.Controllers
             if( (Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Anonymous){
                 
                 itemCreateDto.EMI = null;
-                //itemCreateDto.Stock = 1;
-
             }
             else if((Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Single){
                 
@@ -115,7 +113,6 @@ namespace API.Controllers
             if( (Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Anonymous){
                 
                 itemCreateDto.EMI = null;
-                itemCreateDto.Stock = 1;
 
             }
             else if((Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Single)

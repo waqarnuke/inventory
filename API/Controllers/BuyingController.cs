@@ -236,36 +236,19 @@ namespace API.Controllers
             //     };
             // }
         }
-        // [HttpPost]
-        // public async Task<ActionResult<Buying>> CreateItem1(BuyingCreateDto newPurchase)
-        // {
-        //     if (newPurchase.Quantity <= 0 || newPurchase.PricePerUnit <= 0)
-        //         return BadRequest("Invalid quantity or price.");
+        
+        [HttpDelete]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var item  = await _unitOfWork.buyingRepository.GetByIdAsync(id);
 
-        //     var item = await _unitOfWork.itemRepository.Get(x => x.Title.ToLower() == newPurchase.Title.ToLower());
+            _unitOfWork.buyingRepository.Remove(item);
+
+            var result = await _unitOfWork.Save();
+
+            if(result <= 0) return BadRequest(new ApiResponse(400,"Problem deleting product"));
             
-        //     if (item != null)
-        //     {   
-        //         item.Stock += newPurchase.Quantity;
-        //         _unitOfWork.itemRepository.Update(item);
-        //         await _unitOfWork.Save();
-        //     }
-
-        //     var buying = new Buying
-        //     {
-        //         ItemId = item.Id,
-        //         Quantity = newPurchase.Quantity,
-        //         PricePerUnit = newPurchase.PricePerUnit,
-        //         TotalPrice = newPurchase.Quantity * newPurchase.PricePerUnit,
-        //         PaymentMethod = newPurchase.PaymentMethod
-        //     };
-
-        //     _unitOfWork.buyingRepository.Add(buying);
-        //     int result = await _unitOfWork.Save();
-
-        //     if(result <= 0) return  BadRequest(new ApiResponse(400, "Problem creating Buying item"));
-            
-        //     return Ok("Product added.");
-        // }
+            return Ok();
+        }
     }
 }
