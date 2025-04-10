@@ -142,5 +142,10 @@ namespace Infrastructure.Data
                 PageSize = size
             };
         }
+
+        public void AddRange(IEnumerable<T> entity)
+        {
+            _dbSet.AddRange(entity);
+        }
     }
 }

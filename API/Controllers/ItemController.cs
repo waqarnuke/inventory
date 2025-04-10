@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using API.Dtos;
+using API.Dtos.Buying;
 using API.Dtos.Item;
 using API.Errors;
 using AutoMapper;
@@ -52,10 +53,13 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<ItemCreateDto>> CreateItem(ItemCreateDto itemCreateDto)
         {
+            // later we check duplicate name
+            var IsExists = _unitOfWork.itemRepository.GetAllById(x => x.Title == itemCreateDto.Title);
+
             if( (Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Anonymous){
                 
                 itemCreateDto.EMI = null;
-                itemCreateDto.Stock = 1;
+                //itemCreateDto.Stock = 1;
 
             }
             else if((Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Single){
@@ -88,7 +92,7 @@ namespace API.Controllers
                 LocationId = itemCreateDto.LocationId == 0 ? null : itemCreateDto.LocationId,
                 MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,
                 StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId,
-                SupplierId = itemCreateDto.SupplierId == 0 ? null : itemCreateDto.SupplierId
+                SupplierId = itemCreateDto.SupplierId == 0 ? null : Convert.ToInt32(itemCreateDto.SupplierId) 
             };
             //product.ImageUrl = "images/products/placeholder.png";
             _unitOfWork.itemRepository.Add(item);
@@ -159,6 +163,22 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteItem(int id)
         {
+            //check photo 
+            var photos = await _unitOfWork.imageRepository.GetAllById(x => x.ItemId == id);
+
+            if(photos.Count > 0)
+            {
+                var photoIds = photos.Select(p => p.PublicId).ToList();
+
+                var delResult = await _imageService.DeleteRangePhoto(photoIds);
+
+                if (delResult.Error != null) return BadRequest(delResult.Error.Message);
+
+                _unitOfWork.imageRepository.RemoveRange(photos);
+
+                var phoneResult = await _unitOfWork.Save();
+            }
+
             var item = await _unitOfWork.itemRepository.Get(p => p.Id == id);
 
             _unitOfWork.itemRepository.Remove(item);
@@ -280,5 +300,79 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProducts(string query)
+        {
+            var items  = await _unitOfWork.itemRepository.GetAllById(p => p.Title.Contains(query) || p.EMI == query,includeProperties:"Brand,Model,Location,MobileNetwork,Storage,ItemType,Images");
+
+            var itemToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items);;
+            
+            if (itemToReturn == null) return NotFound(new ApiResponse(404));
+
+            return  Ok(itemToReturn);
+        }
+
+        [HttpPost("createByingItem")]
+        public async Task<ActionResult<BuyingCreateDto>> CreateByingItem(ItemCreateDto itemCreateDto)
+        {
+            // later we check duplicate name
+            var IsExists = _unitOfWork.itemRepository.GetAllById(x => x.Title == itemCreateDto.Title);
+
+            if( (Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Anonymous){
+                
+                itemCreateDto.EMI = null;
+                //itemCreateDto.Stock = 1;
+
+            }
+            else if((Common.ItemType)itemCreateDto.ItemTypeId == Common.ItemType.Single){
+                
+                var emiItem = await _unitOfWork.itemRepository.Get(p => p.EMI == itemCreateDto.EMI);
+                
+                if(emiItem != null) return BadRequest(new ApiResponse(400, "Item already exists"));
+
+                itemCreateDto.Stock = 1;
+
+            }
+            else
+            {
+                itemCreateDto.EMI = null;
+            }
+            
+            Item item =new(){
+                Title = itemCreateDto.Title,
+                Description = itemCreateDto.Description,
+                BrandId = itemCreateDto.BrandId == 0 ? null : itemCreateDto.BrandId,
+                ModelId = itemCreateDto.ModelId == 0 ? null : itemCreateDto.ModelId,
+                Price = itemCreateDto.Price,
+                Stock = itemCreateDto.Stock,
+                EMI = itemCreateDto.EMI,
+                IsSingle = itemCreateDto.IsSingle,
+                ImageUrl = itemCreateDto.ImageUrl,
+                Color = itemCreateDto.Color,
+                Condition = itemCreateDto.Condition,
+                ItemTypeId = itemCreateDto.ItemTypeId == 0 ? null : itemCreateDto.ItemTypeId,
+                LocationId = itemCreateDto.LocationId == 0 ? null : itemCreateDto.LocationId,
+                MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,
+                StorageId = itemCreateDto.StorageId == 0 ? null : itemCreateDto.StorageId,
+                SupplierId = itemCreateDto.SupplierId == 0 ? null : Convert.ToInt32(itemCreateDto.SupplierId) 
+            };
+            //product.ImageUrl = "images/products/placeholder.png";
+            _unitOfWork.itemRepository.Add(item);
+            
+            var result = await _unitOfWork.Save();
+            
+            if(result <= 0) return  BadRequest(new ApiResponse(400, "Problem creating product"));
+
+            BuyingCreateDto buyingItem = new(){
+                ItemId = item.Id,
+                Title = item.Title,
+                Quantity = item.Stock,
+                PricePerUnit = Convert.ToDecimal(item.Price),
+                LocationId = item.LocationId
+            };
+
+            return Ok(buyingItem);
+        }
+    
     }
 }

@@ -50,4 +50,13 @@ public class ImageService : IImageService
         var deleteParams = new DeletionParams(publicId);
         return await _cloudinary.DestroyAsync(deleteParams);
     }
+
+    public async Task<DelResResult> DeleteRangePhoto(List<string> publicIds )
+    {
+        var deleteParams = new DelResParams
+        {
+            PublicIds = publicIds   
+        };
+        return await _cloudinary.DeleteResourcesAsync(deleteParams);
+    }
 }

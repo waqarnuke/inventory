@@ -7,4 +7,5 @@ public interface IImageService
 {
     Task<ImageUploadResult> AddPhoto(IFormFile file);
     Task<DeletionResult> DeletePhoto(string publicId);
+    Task<DelResResult> DeleteRangePhoto(List<string> publicIds );
 }

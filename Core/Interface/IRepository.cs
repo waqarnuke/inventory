@@ -20,5 +20,7 @@ namespace Core.Interface
         Task<IReadOnlyList<T>> ListAllAsync();
         Task<PagedResult<T>> GetPagination(int index, int size, string orderBy = null, bool ascending = true, 
                                                         string includeProperties = null,Expression<Func<T,bool>> filter = null);
+
+        void AddRange(IEnumerable<T> entity);
     }
 }
