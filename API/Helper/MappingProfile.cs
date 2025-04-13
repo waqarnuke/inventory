@@ -1,4 +1,5 @@
 using API.Dtos;
+using API.Dtos.Buying;
 using API.Dtos.Item;
 using API.Dtos.Product;
 using AutoMapper;
@@ -28,6 +29,10 @@ namespace API.Helper
                 .ForMember(c => c.ItemType, o => o.MapFrom(s => s.ItemType.Name));
 
             CreateMap<Image, ImageDto>();    
+
+            CreateMap<Buying, BuyingToReturnDto>()
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Items.Title))
+                .ForMember(dest => dest.LocationName ,opt => opt.MapFrom(src => src.Location.Name));
         }
     }
 }

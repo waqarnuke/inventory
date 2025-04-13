@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using API.Dtos.Buying;
 using API.Dtos.Item;
 using API.Errors;
@@ -24,11 +25,11 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Buying>>> GetItems()
         {
-            var buying = await _unitOfWork.buyingRepository.GetAll();
-            //var itemsToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items);
-            if (buying == null) return NotFound(new ApiResponse(404));
+            var buying = await _unitOfWork.buyingRepository.GetAll(includeProperties:"Items,Location");
+            var result = _mapper.Map<List<BuyingToReturnDto>>(buying);
+            if (result == null) return NotFound(new ApiResponse(404));
 
-            return Ok(buying);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -250,5 +251,36 @@ namespace API.Controllers
             
             return Ok();
         }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> Serach(int index, int size, string orderBy = null, bool ascending = true,string search = null)
+        {
+            // ✅ Optional filter setup
+            Expression<Func<Buying, bool>> filter = null;
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                filter = x => x.Items.Title.Contains(search);
+            }
+            
+            var buying = await _unitOfWork.buyingRepository.GetPagination(index, size, orderBy, ascending, 
+                                                                        includeProperties: "Items,Location",
+                                                                        filter: filter);
+            //var itemsToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items.Items);
+            var buyingDto = _mapper.Map<List<BuyingToReturnDto>>(buying.Items);
+            if (buyingDto == null) return NotFound(new ApiResponse(404));
+
+            var result = new PagedResultDto<BuyingToReturnDto>
+            {
+                Data = buyingDto,
+                TotalCount = buying.TotalCount,
+                PageSize = buying.PageSize,
+                PageIndex = buying.PageIndex,
+            };
+
+            return Ok(result);
+        }
+
     }
+
+    
 }
