@@ -113,5 +113,64 @@ namespace API.Controllers
             return Ok(new { Message = "Sale confirmed successfully", TotalAmount = totalAmount });
         }
 
+        [HttpPost("confirm")]
+        public async Task<IActionResult> Confirm(SaleRequestDto itemsSale)
+        {
+            string getTransId = Guid.NewGuid().ToString();
+
+            if (itemsSale == null || itemsSale.Items == null || !itemsSale.Items.Any())
+                return BadRequest("No items to confirm.");
+
+            var totalAmount = itemsSale.Items.Sum(i => i.Quantity * i.PricePerUnit);
+
+            var getRegister = await _unitOfWork.registerRepository.GetAll();
+            Register register = getRegister.FirstOrDefault();
+
+            if (register == null)
+            {
+                return BadRequest("Register not found.");
+            }
+            
+            if (itemsSale.PaymentMethod == "Cash")
+            {
+                register.CashBalance += totalAmount;
+            }
+            else if (itemsSale.PaymentMethod == "Card")
+            {
+                register.CardBalance += totalAmount;
+            }
+            else
+            {
+                return BadRequest("Invalid payment method.");
+            }
+            // Process each item in the sale
+            foreach (var item in itemsSale.Items)
+            {
+                var product = await _unitOfWork.itemRepository.Get(p => p.Id == item.ItemId);
+                if (product == null || product.Stock < item.Quantity)
+                    return BadRequest($"Stock insufficient for {item.Title}.");
+
+                // Reduce stock from inventory
+                product.Stock -= item.Quantity;
+                // Create a new Sale entity
+                var sale = new Sale
+                {
+                    TransactionId = getTransId,
+                    ItemId = item.ItemId,
+                    Quantity = item.Quantity,
+                    PricePerUnit = item.PricePerUnit,
+                    TotalPrice = item.Quantity * item.PricePerUnit,
+                    PaymentMethod = itemsSale.PaymentMethod,
+                };
+                _unitOfWork.saleRepository.Add(sale);
+            }
+
+            // Save changes to the database
+            int result = await _unitOfWork.Save();
+            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem in creating selling item"));
+
+            return Ok(new { Message = "Sale confirmed successfully" });
+        }
+        
     }
 }

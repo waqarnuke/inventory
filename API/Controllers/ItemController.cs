@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using API.Dtos;
 using API.Dtos.Buying;
 using API.Dtos.Item;
+using API.Dtos.Sale;
 using API.Errors;
 using AutoMapper;
 using Core.Entities;
@@ -304,9 +305,17 @@ namespace API.Controllers
 
             var itemToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items);;
             
-            if (itemToReturn == null) return NotFound(new ApiResponse(404));
+            var result =itemToReturn.Select(res => new SaleCreateDto{
+                ItemId = res.Id,
+                Title = res.Title,
+                Quantity = res.Stock,
+                PricePerUnit = Convert.ToDecimal(res.Price),
+                LocationId = res.LocationId
+            }).ToList();
 
-            return  Ok(itemToReturn);
+            if (result == null) return NotFound(new ApiResponse(404));
+
+            return  Ok(result);
         }
 
         [HttpPost("createByingItem")]
