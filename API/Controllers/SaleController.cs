@@ -1,3 +1,4 @@
+using API.Dtos.Item;
 using API.Dtos.Sale;
 using API.Errors;
 using Core.Entities;
@@ -172,5 +173,42 @@ namespace API.Controllers
             return Ok(new { Message = "Sale confirmed successfully" });
         }
         
+        [HttpGet("get-sale-by-transaction")]
+        public async Task<ActionResult<PagedResultDto<SaleTransactionDto>>> GetSaleByTransaction(int index, int size, string orderBy = null, bool ascending = true,string search = null)
+        {
+            var today = DateTime.UtcNow.Date;
+            var sale = await _unitOfWork.saleRepository.GetAll(includeProperties: "Items,Location");
+
+            if (sale == null || !sale.Any())
+                return NotFound(new ApiResponse(404, "Sale not found."));
+
+            var groupSales = sale.GroupBy(s => s.TransactionId)
+                .Select(g => new SaleTransactionDto
+                {
+                    TransactionId = g.Key,
+                    SaleDate = g.First().CreatedTime,
+                    PaymentMethod = g.First().PaymentMethod,
+                    Quantity = g.Sum(s => s.Quantity),
+                    PricePerUnit = g.First().PricePerUnit,
+                    TotalPrice = g.Sum(s => s.TotalPrice),
+                    Items = g.Select(s => new ItemToReturnDto
+                    {
+                        Id = s.ItemId,
+                        Title = s.Items.Title,
+                        Stock = s.Quantity,
+                        Price = s.Items.Price
+                    }).ToList()
+                }).OrderByDescending(s => s.SaleDate).ToList();
+
+            var result = new PagedResultDto<SaleTransactionDto>
+            {
+                Data = groupSales,
+                TotalCount = groupSales.Count,
+                PageSize = 10, // Set your desired page size
+                PageIndex = 1, // Set your desired page index
+            };
+            
+            return Ok(result);
+        }
     }
 }
