@@ -271,10 +271,10 @@ namespace API.Controllers
         }
     
         [HttpGet("getPaginatedItems")]
-        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> GetPaginatedItems(int index, int size, string orderBy = null, bool ascending = true,string search = null)
+        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> GetPaginatedItems(int LocationId,int index, int size, string orderBy = null, bool ascending = true,string search = null)
         {
             // ✅ Optional filter setup
-            Expression<Func<Item, bool>> filter = null;
+            Expression<Func<Item, bool>> filter = x => x.LocationId == LocationId;
             if (!string.IsNullOrWhiteSpace(search))
             {
                 filter = x => x.Title.Contains(search);

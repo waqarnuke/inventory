@@ -162,6 +162,7 @@ namespace API.Controllers
                     PricePerUnit = item.PricePerUnit,
                     TotalPrice = item.Quantity * item.PricePerUnit,
                     PaymentMethod = itemsSale.PaymentMethod,
+                    LocationId = item.LocationId,
                 };
                 _unitOfWork.saleRepository.Add(sale);
             }
@@ -174,10 +175,10 @@ namespace API.Controllers
         }
         
         [HttpGet("get-sale-by-transaction")]
-        public async Task<ActionResult<PagedResultDto<SaleTransactionDto>>> GetSaleByTransaction(int index, int size, string orderBy = null, bool ascending = true,string search = null)
+        public async Task<ActionResult<PagedResultDto<SaleTransactionDto>>> GetSaleByTransaction(int LocationId,int index, int size, string orderBy = null, bool ascending = true,string search = null)
         {
             var today = DateTime.UtcNow.Date;
-            var sale = await _unitOfWork.saleRepository.GetAll(includeProperties: "Items,Location");
+            var sale = await _unitOfWork.saleRepository.GetAllById(x=>x.LocationId == LocationId, includeProperties: "Items,Location");
 
             if (sale == null || !sale.Any())
                 return NotFound(new ApiResponse(404, "Sale not found."));
