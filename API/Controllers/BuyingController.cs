@@ -80,11 +80,11 @@ namespace API.Controllers
                 return BadRequest("Cart is empty or transaction ID is invalid.");
 
             // Calculate total amount
-            decimal totalAmount = cartItems.Sum(item => item.TotalPrice.Value);  
+            decimal totalAmount = cartItems.Sum(item => item.TotalPrice ?? 0);  
 
             // Get register balance
             var getRegister = await _unitOfWork.registerRepository.GetAll() ;
-            Register register = getRegister.FirstOrDefault();
+            Register register = getRegister.FirstOrDefault() ?? new Register();
 
             if (register == null)
             {
@@ -161,7 +161,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(getTransId))
                     getTransId = Guid.NewGuid().ToString();
 
-            var buying =  itemsPurchases.Items.Select(item => new Buying{
+            var buying =  itemsPurchases?.Items?.Select(item => new Buying{
                     ItemId = item.ItemId,
                     Quantity = item.Quantity, 
                     PricePerUnit = Convert.ToDecimal(item.PricePerUnit),
@@ -170,7 +170,8 @@ namespace API.Controllers
                     TransactionId = getTransId,
                     LocationId = item.LocationId
             }).ToList();
-
+            if (buying == null || !buying.Any())
+                return BadRequest("No items to confirm.");
             _unitOfWork.buyingRepository.AddRange(buying);
             int resultBuy = await _unitOfWork.Save();
 
@@ -184,24 +185,24 @@ namespace API.Controllers
                 return BadRequest("Cart is empty or transaction ID is invalid.");
 
             // Calculate total amount
-            decimal totalAmount = cartItems.Sum(item => item.TotalPrice.Value);  
+            decimal totalAmount = cartItems.Sum(item => item.TotalPrice ?? 0);  
 
             // Get register balance
             var getRegister = await _unitOfWork.registerRepository.GetAll() ;
-            Register register = getRegister.FirstOrDefault();
+            Register register = getRegister.FirstOrDefault() ?? new Register();;
 
             if (register == null)
             {
                 return BadRequest("Register not found.");
             }
             // Deduct amount based on payment method
-            if (itemsPurchases.PaymentMethod == "Cash")
+            if (itemsPurchases != null && itemsPurchases.PaymentMethod == "Cash")
             {
                 if (register.CashBalance < totalAmount)
                     return BadRequest("Insufficient Cash Balance.");
                 register.CashBalance -= totalAmount;
             }
-            else if (itemsPurchases.PaymentMethod == "Card")
+            else if (itemsPurchases != null && itemsPurchases.PaymentMethod == "Card")
             {
                 if (register.CardBalance < totalAmount)
                     return BadRequest("Insufficient Card Balance.");
@@ -243,6 +244,8 @@ namespace API.Controllers
         {
             var item  = await _unitOfWork.buyingRepository.GetByIdAsync(id);
 
+            if(item == null) return NotFound(new ApiResponse(404,"Item not found"));
+            
             _unitOfWork.buyingRepository.Remove(item);
 
             var result = await _unitOfWork.Save();
@@ -253,13 +256,13 @@ namespace API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> Serach(int index, int size, string orderBy = null, bool ascending = true,string search = null)
+        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> Serach(int index, int size, string? orderBy = null, bool ascending = true,string? search = null)
         {
             // ✅ Optional filter setup
-            Expression<Func<Buying, bool>> filter = null;
+            Expression<Func<Buying, bool>>? filter = null;
             if (!string.IsNullOrWhiteSpace(search))
             {
-                filter = x => x.Items.Title.Contains(search);
+                filter = x => x.Items != null && x.Items.Title != null && x.Items.Title.Contains(search);
             }
             
             var buying = await _unitOfWork.buyingRepository.GetPagination(index, size, orderBy, ascending, 

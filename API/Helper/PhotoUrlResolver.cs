@@ -23,7 +23,7 @@ namespace API.Helper
                 return _config["ApiUrl"] + source.PictureUrl;
             }
 
-            return null;
+            return "";
         }
     }
 }

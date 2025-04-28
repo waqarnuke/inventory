@@ -8,16 +8,18 @@ using API.Errors;
 using AutoMapper;
 using Core.Entities;
 using Core.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
+
     public class ItemController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
-        private readonly IImageRepository photorepo;
         public ItemController(IUnitOfWork unitOfWork,IMapper mapper,IImageService imageService)
         {
             _unitOfWork = unitOfWork;
@@ -42,7 +44,9 @@ namespace API.Controllers
         public async Task<ActionResult<ItemToReturnDto>> GetItem(int id)
         {
             var item  = await _unitOfWork.itemRepository.Get(p => p.Id == id,includeProperties:"Brand,Model,Location,MobileNetwork,Storage,ItemType,Images");
-
+            
+            if(item == null) return NotFound(new ApiResponse(404,"Item not found"));
+            
             var itemToReturn = _mapper.Map<Item,ItemToReturnDto>(item);
             //var imageToReturn = _mapper.Map<ICollection<Image>,ICollection<ImageDto>>(item.Images);
 
@@ -76,17 +80,17 @@ namespace API.Controllers
             }
             
             Item item =new(){
-                Title = itemCreateDto.Title,
-                Description = itemCreateDto.Description,
+                Title = itemCreateDto.Title ?? string.Empty,
+                Description = itemCreateDto.Description ?? string.Empty,
                 BrandId = itemCreateDto.BrandId == 0 ? null : itemCreateDto.BrandId,
                 ModelId = itemCreateDto.ModelId == 0 ? null : itemCreateDto.ModelId,
                 Price = itemCreateDto.Price,
                 Stock = itemCreateDto.Stock,
-                EMI = itemCreateDto.EMI,
+                EMI = itemCreateDto.EMI ?? string.Empty,
                 IsSingle = itemCreateDto.IsSingle,
-                ImageUrl = itemCreateDto.ImageUrl,
-                Color = itemCreateDto.Color,
-                Condition = itemCreateDto.Condition,
+                ImageUrl = itemCreateDto.ImageUrl ?? string.Empty,
+                Color = itemCreateDto.Color ?? string.Empty,
+                Condition = itemCreateDto.Condition ?? string.Empty,
                 ItemTypeId = itemCreateDto.ItemTypeId == 0 ? null : itemCreateDto.ItemTypeId,
                 LocationId = itemCreateDto.LocationId == 0 ? null : itemCreateDto.LocationId,
                 MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,
@@ -131,18 +135,18 @@ namespace API.Controllers
             }
 
             Item item =new(){
-                Title = itemCreateDto.Title,
-                Description = itemCreateDto.Description,
+                Title = itemCreateDto.Title ?? string.Empty,
+                Description = itemCreateDto.Description ?? string.Empty,
                 BrandId = itemCreateDto.BrandId == 0 ? null : itemCreateDto.BrandId,
                 ModelId = itemCreateDto.ModelId == 0 ? null : itemCreateDto.ModelId,
                 Price = itemCreateDto.Price,
                 Stock = itemCreateDto.Stock,
-                EMI = itemCreateDto.EMI,
+                EMI = itemCreateDto.EMI ?? string.Empty,
                 IsSingle = itemCreateDto.IsSingle,
-                ImageUrl = itemCreateDto.ImageUrl,
+                ImageUrl = itemCreateDto.ImageUrl ?? string.Empty,
                 Id = id,
-                Color = itemCreateDto.Color,
-                Condition = itemCreateDto.Condition,
+                Color = itemCreateDto.Color ?? string.Empty,
+                Condition = itemCreateDto.Condition ?? string.Empty,
                 ItemTypeId = itemCreateDto.ItemTypeId == 0 ? null : itemCreateDto.ItemTypeId,
                 LocationId = itemCreateDto.LocationId == 0 ? null : itemCreateDto.LocationId,
                 MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,
@@ -166,8 +170,8 @@ namespace API.Controllers
 
             if(photos.Count > 0)
             {
-                var photoIds = photos.Select(p => p.PublicId).ToList();
-
+                var photoIds = photos.Select(p => p.PublicId ?? "").ToList();
+                
                 var delResult = await _imageService.DeleteRangePhoto(photoIds);
 
                 if (delResult.Error != null) return BadRequest(delResult.Error.Message);
@@ -179,6 +183,8 @@ namespace API.Controllers
 
             var item = await _unitOfWork.itemRepository.Get(p => p.Id == id);
 
+            if (item == null) return NotFound(new ApiResponse(404, "Item not found"));
+            
             _unitOfWork.itemRepository.Remove(item);
 
             var result = await _unitOfWork.Save();
@@ -218,7 +224,7 @@ namespace API.Controllers
                     PublicId = x.PublicId,
                     Url = x.Url,
                     UserId = x.UserId,
-                    ItemId = x.ItemId.Value
+                    ItemId = x.ItemId ?? 0,
                 } ).ToList();
 
                 return response;
@@ -257,7 +263,7 @@ namespace API.Controllers
         [HttpPost("buy/{id}/{quantity}")]
         public async Task<IActionResult> BuyProduct(int id, int quantity)
         {
-            Item item = await _unitOfWork.itemRepository.Get(x => x.Id == id);
+            Item? item = await _unitOfWork.itemRepository.Get(x => x.Id == id);
             if (item == null)
                 return NotFound("Product not found.");
             
@@ -271,7 +277,7 @@ namespace API.Controllers
         }
     
         [HttpGet("getPaginatedItems")]
-        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> GetPaginatedItems(int LocationId,int index, int size, string orderBy = null, bool ascending = true,string search = null)
+        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> GetPaginatedItems(int LocationId,int index, int size, string? orderBy = null, bool ascending = true,string? search = null)
         {
             // ✅ Optional filter setup
             Expression<Func<Item, bool>> filter = x => x.LocationId == LocationId;
@@ -283,7 +289,7 @@ namespace API.Controllers
             var items = await _unitOfWork.itemRepository.GetPagination(index, size, orderBy, ascending, 
                                                                         includeProperties: "Brand,Model,Location,MobileNetwork,Storage",
                                                                         filter: filter);
-            var itemsToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items.Items);
+            var itemsToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items.Items ?? new List<Item>());
             
             if (itemsToReturn == null) return NotFound(new ApiResponse(404));
 
@@ -345,17 +351,17 @@ namespace API.Controllers
             }
             
             Item item =new(){
-                Title = itemCreateDto.Title,
-                Description = itemCreateDto.Description,
+                Title = itemCreateDto.Title ?? string.Empty,
+                Description = itemCreateDto.Description  ?? string.Empty,
                 BrandId = itemCreateDto.BrandId == 0 ? null : itemCreateDto.BrandId,
                 ModelId = itemCreateDto.ModelId == 0 ? null : itemCreateDto.ModelId,
                 Price = itemCreateDto.Price,
                 Stock = itemCreateDto.Stock,
-                EMI = itemCreateDto.EMI,
+                EMI = itemCreateDto.EMI  ?? string.Empty,
                 IsSingle = itemCreateDto.IsSingle,
-                ImageUrl = itemCreateDto.ImageUrl,
-                Color = itemCreateDto.Color,
-                Condition = itemCreateDto.Condition,
+                ImageUrl = itemCreateDto.ImageUrl ?? string.Empty,
+                Color = itemCreateDto.Color ?? string.Empty,
+                Condition = itemCreateDto.Condition ?? string.Empty,
                 ItemTypeId = itemCreateDto.ItemTypeId == 0 ? null : itemCreateDto.ItemTypeId,
                 LocationId = itemCreateDto.LocationId == 0 ? null : itemCreateDto.LocationId,
                 MobileNetworkId = itemCreateDto.MobileNetworkId == 0 ? null : itemCreateDto.MobileNetworkId,

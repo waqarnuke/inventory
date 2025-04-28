@@ -24,6 +24,7 @@ namespace Infrastructure.Data
         public DbSet<Register> Registers { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<Company> Companies { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {   
             // modelBuilder.Entity<Item>()
@@ -32,6 +33,11 @@ namespace Infrastructure.Data
             //     .HasForeignKey(i => i.ItemId)
             //     .OnDelete(DeleteBehavior.Cascade); 
 
+            
+            modelBuilder.Entity<Company>().HasData(
+                new Company{Id=1, Name="Abc"}
+            );
+            
             modelBuilder.Entity<Brand>().HasData(
                 new Brand{Id=1, Name="Apple"},
                 new Brand{Id=2, Name="Samsung"},
@@ -144,20 +150,21 @@ namespace Infrastructure.Data
             );
         
             modelBuilder.Entity<Item>().HasData(
-                new Item{Id=1, Title="iPhone 11", Description="I phone 11 test", BrandId=1,ModelId=1,Price=999,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=1,StorageId=1,ItemTypeId=1},  
-                new Item{Id=2, Title="Galaxy S20", Description="I Glaxy S20 test", BrandId=2,ModelId=2,Price=899,ImageUrl="/images/product/placeholder.jpg",LocationId=2,MobileNetworkId=2,StorageId=2,ItemTypeId=2},
-                new Item{Id=3, Title="P40 Pro",  Description="I P40 pro test", BrandId=3,ModelId=3,Price=799,ImageUrl="/images/product/placeholder.jpg",LocationId=3,MobileNetworkId=3,StorageId=3,ItemTypeId=1},
-                new Item{Id=4, Title="iPhone 11", Description="I phone 11 test", BrandId=1,ModelId=1,Price=999,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=1,StorageId=4,ItemTypeId=1},
-                new Item{Id=5, Title="Galaxy S20",Description="I Glaxy S20 test", BrandId=2,ModelId=2,Price=899,ImageUrl="/images/product/placeholder.jpg",LocationId=2,MobileNetworkId=2,StorageId=5,ItemTypeId=1},
-                new Item{Id=6, Title="P40 Pro", Description="I P40 pro test",BrandId=3,ModelId=3,Price=799,ImageUrl="/images/product/placeholder.jpg",LocationId=3,MobileNetworkId=3,StorageId=1,ItemTypeId=1},
-                new Item{Id=7, Title="Charger", Description="20 chagere", BrandId=4,ModelId=4,Price=10,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=8,StorageId=6,ItemTypeId=3},
-                new Item{Id=8, Title="Temper Glass", Description="20 Glass", BrandId=4,ModelId=4,Price=10,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=8,StorageId=6,ItemTypeId=3}
+                new Item{Id=1, Title="iPhone 11", Description="I phone 11 test", BrandId=1,ModelId=1,Price=999,Stock=10,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=1,StorageId=1,ItemTypeId=1},  
+                new Item{Id=2, Title="Galaxy S20", Description="I Glaxy S20 test", BrandId=2,ModelId=2,Price=899,Stock=10,ImageUrl="/images/product/placeholder.jpg",LocationId=2,MobileNetworkId=2,StorageId=2,ItemTypeId=2},
+                new Item{Id=3, Title="P40 Pro",  Description="I P40 pro test", BrandId=3,ModelId=3,Price=799,Stock=10,ImageUrl="/images/product/placeholder.jpg",LocationId=3,MobileNetworkId=3,StorageId=3,ItemTypeId=1},
+                new Item{Id=4, Title="iPhone 11", Description="I phone 11 test", BrandId=1,ModelId=1,Price=999,Stock=10,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=1,StorageId=4,ItemTypeId=1},
+                new Item{Id=5, Title="Galaxy S20",Description="I Glaxy S20 test", BrandId=2,ModelId=2,Price=899,Stock=10,ImageUrl="/images/product/placeholder.jpg",LocationId=2,MobileNetworkId=2,StorageId=5,ItemTypeId=1},
+                new Item{Id=6, Title="P40 Pro", Description="I P40 pro test",BrandId=3,ModelId=3,Price=799,Stock=10,ImageUrl="/images/product/placeholder.jpg",LocationId=3,MobileNetworkId=3,StorageId=1,ItemTypeId=1},
+                new Item{Id=7, Title="Charger", Description="20 chagere", BrandId=4,ModelId=4,Price=10,Stock=10,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=8,StorageId=6,ItemTypeId=3},
+                new Item{Id=8, Title="Temper Glass", Description="20 Glass", BrandId=4,ModelId=4,Price=10,Stock=10,ImageUrl="/images/product/placeholder.jpg",LocationId=1,MobileNetworkId=8,StorageId=6,ItemTypeId=3}
             );
 
             modelBuilder.Entity<Location>().HasData(
-                new Location{Id=1, Name="Humble"},
-                new Location{Id=2, Name="Kingwood"},
-                new Location{Id=3, Name="Atascocita"}
+                new Location{Id=1, Name="Humble", Address="Humble", CompanyId=1},
+                new Location{Id=2, Name="Houston", Address="Houston", CompanyId=1},
+                new Location{Id=3, Name="Kingwood", Address="Kingwood" , CompanyId=1},
+                new Location{Id=4, Name="Atascocita" , Address="Atascocita", CompanyId=1}
             );
 
             modelBuilder.Entity<MobileNetwork>().HasData(

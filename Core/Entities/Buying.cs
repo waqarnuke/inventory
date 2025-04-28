@@ -16,9 +16,9 @@ public class Buying : BaseEntity
     public Guid? UserId { get; set; }
 
     [ForeignKey("ItemId")]
-    public virtual Item Items { get; set; }
+    public virtual Item? Items { get; set; }
 
     public int? LocationId { get; set; }
     [ForeignKey("LocationId")]
-    public virtual Location Location { get; set; }
+    public virtual Location? Location { get; set; }
 }

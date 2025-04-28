@@ -46,8 +46,10 @@ namespace API.Controllers
         [HttpPut]
         public async Task<ActionResult<Category>> Update(Category category)
         {
-            Category cat = await _repo.categoryRepository
-            .Get(u=>u.Id == category.Id);
+            Category? cat = await _repo.categoryRepository.Get(u=>u.Id == category.Id);
+            
+            if(cat == null) return NotFound(new ApiResponse(404,"Category not found"));
+
             cat.Name=category.Name;
             cat.DisplayOrder = category.DisplayOrder;
             if(cat != null)
@@ -62,11 +64,11 @@ namespace API.Controllers
         [HttpDelete]
         public async Task Delete(int id)
         {
-            Category category  = await _repo.categoryRepository.GetByIdAsync(id);
+            Category? category  = await _repo.categoryRepository.GetByIdAsync(id);
             if(category != null)
             {
                 _repo.categoryRepository.Remove(category);
-                _repo.Save();
+                await _repo.Save();
                 //return Ok();
             } 
             //return NotFound();

@@ -9,6 +9,6 @@ namespace Core.Entities
         public int Id { get; set; } 
         [Required]
         [Column(TypeName = "nvarchar(100)")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }

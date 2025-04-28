@@ -22,6 +22,7 @@ public class ImageService : IImageService
 
     public async Task<ImageUploadResult> AddPhoto(IFormFile file)
     {
+        ImageUploadResult uploadResult = new ImageUploadResult();
         if(file.Length > 0)
         {
             await using var stream = file.OpenReadStream();
@@ -32,7 +33,7 @@ public class ImageService : IImageService
                 Transformation = new Transformation().Height(500).Width(500).Crop("fill")
             };
             
-            var uploadResult = await _cloudinary .UploadAsync(uploadParams);
+            uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
             if(uploadResult.Error !=null)
             {
@@ -42,7 +43,7 @@ public class ImageService : IImageService
             return uploadResult;
         }
 
-        return null;
+        return uploadResult;
     }
 
     public async Task<DeletionResult> DeletePhoto(string publicId)

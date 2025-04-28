@@ -6,7 +6,7 @@ namespace API.Dtos.Buying;
 public class BuyingCreateDto
 {
     public int ItemId { get; set; }
-    public string Title { get; set; }
+    public string? Title { get; set; }
     public int Quantity { get; set; }
     public decimal? PricePerUnit { get; set; }
     public decimal? TotalPrice { get; set; }

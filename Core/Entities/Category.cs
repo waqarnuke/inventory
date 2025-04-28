@@ -11,7 +11,7 @@ namespace Core.Entities
         
         [Required]
         [MaxLength(30)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         [Required]
         [Range(1,100)]
         public int DisplayOrder { get; set; }

@@ -6,13 +6,13 @@ namespace Core.Entities
     public class Product : BaseEntity
     { 
         [Required]
-        public string Title { get; set; }
+        public string? Title { get; set; }
         [Required]
-        public string Description { get; set; }
+        public string? Description { get; set; }
         [Required]
-        public string ISBN { get; set; }
+        public string? ISBN { get; set; }
         [Required]
-        public string Author { get; set; }
+        public string? Author { get; set; }
         [Required]
         [Display(Name = "List Price")]
         [Range(1,1000)]
@@ -32,12 +32,12 @@ namespace Core.Entities
         [Range(1,1000)]
         public double Price100 { get; set; }
         //[ValidateNever]
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
 
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
         //[ValidateNever]
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
 
         private readonly List<Photo> _Photos = new List<Photo>();
         public IReadOnlyList<Photo> Photos => _Photos.AsReadOnly();
@@ -58,6 +58,7 @@ namespace Core.Entities
         public void RemovePhoto(int id)
         {
             var photo = _Photos.Find(x => x.Id == id);
+            if (photo == null) return;
             _Photos.Remove(photo);
         }
 

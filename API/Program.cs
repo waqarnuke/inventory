@@ -4,6 +4,8 @@ using API.Middleware;
 using Core.Interface;
 using Infrastructure.Data;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -37,8 +39,8 @@ builder.Services.Configure<ApiBehaviorOptions>(option =>
     option.InvalidModelStateResponseFactory = actionContext =>
     {
         var error = actionContext.ModelState
-            .Where(e=>e.Value.Errors.Count > 0)
-            .SelectMany(x => x.Value.Errors)
+            .Where(e=> e.Value != null && e.Value.Errors.Count > 0)
+            .SelectMany(x => x.Value!.Errors)
             .Select(x => x.ErrorMessage).ToArray();
 
         var errorResponse = new ApiValidationErrorResponse
@@ -51,35 +53,95 @@ builder.Services.Configure<ApiBehaviorOptions>(option =>
 });
 
 builder.Services.AddCors(options =>
-{
-    options.AddPolicy("CoresPolicy",
-    Policy =>
     {
-        Policy.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
+        options.AddPolicy("AllowAngularApp",
+            policy =>
+            {
+                policy.WithOrigins("http://localhost:4200",
+                                    "https://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+            });
     });
-});
 
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("AllowAngularOrigins",
-//     builder =>
+// builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+//     .AddCookie(options =>
 //     {
-//         builder.WithOrigins(
-//                             "https://localhost:4200"
-//                             )
-//                             .AllowAnyHeader()
-//                             .AllowAnyMethod();
+//         options.Cookie.SameSite = SameSiteMode.None;
+//         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+//         options.Cookie.HttpOnly = true;
+//         options.Events = new CookieAuthenticationEvents
+//         {
+//             OnRedirectToLogin = context =>
+//             {
+//                 context.Response.StatusCode = StatusCodes.Status401Unauthorized; // 🔥
+//                 return Task.CompletedTask;
+//             },
+//             OnRedirectToAccessDenied = context =>
+//             {
+//                 context.Response.StatusCode = StatusCodes.Status403Forbidden; // 🔥
+//                 return Task.CompletedTask;
+//             }
+//         };
 //     });
+
+// // Authorization
+// builder.Services.AddAuthorization();
+
+// builder.Services.ConfigureApplicationCookie(options =>
+// {
+//     options.Cookie.SameSite = SameSiteMode.None; // Allows cross-origin cookies
+//     options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Requires HTTPS
+//     options.Cookie.HttpOnly = true; 
+//      options.Events = new CookieAuthenticationEvents
+//         {
+//             OnRedirectToLogin = context =>
+//             {
+//                 context.Response.StatusCode = StatusCodes.Status401Unauthorized; // 🔥
+//                 return Task.CompletedTask;
+//             },
+//             OnRedirectToAccessDenied = context =>
+//             {
+//                 context.Response.StatusCode = StatusCodes.Status403Forbidden; // 🔥
+//                 return Task.CompletedTask;
+//             }
+//         };
 // });
+// builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+//         .AddCookie();
+// builder.Services.AddAuthorization();
 
-//builder.Services.Configure<CloudinarySetting>(builder.Configuration.GetSection("Cloudinary"));
 
+
+// Data Protection
+// builder.Services.AddDataProtection()
+//     .PersistKeysToFileSystem(new DirectoryInfo(@"C:\keys"))
+//     .SetApplicationName("SharedAppName");
+
+builder.Services.AddAuthentication("Identity.Application")
+    .AddCookie("Identity.Application", options =>
+    {
+        options.Cookie.Name = ".AspNetCore.Identity.Application";
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"C:\Shared-Keys\"))
+    .SetApplicationName("SharedCookieApp");
+    
 var app = builder.Build();
 
 //My middle ware here
 app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseStatusCodePagesWithReExecute("/error/{0}");
+//app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -97,9 +159,14 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/Content"
 });
 
-app.UseCors("CoresPolicy");
+app.UseCors("AllowAngularApp");
 
+app.UseRouting();
+
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCookiePolicy();
 
 app.MapControllers();
 

@@ -15,11 +15,11 @@ namespace API.Helper
         {
             _config = config;
         }
-       public string Resolve(Product source, ProductToReturnDto destination, string destMember, ResolutionContext context)
+        public string Resolve(Product source, ProductToReturnDto destination, string destMember, ResolutionContext context)
         {
             //var photo = source.Photos.FirstOrDefault(x => x.IsMain);
             
-            if(!string.IsNullOrEmpty(source.ImageUrl));
+            if(!string.IsNullOrEmpty(source.ImageUrl))
             {
                 return _config["ApiProductUrl"] + source.ImageUrl;
             }

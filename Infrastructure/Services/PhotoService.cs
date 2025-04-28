@@ -22,7 +22,7 @@ namespace Infrastructure.Services
 
                 return photo;
             }
-            return null;
+            return photo;
         }
         public void DeleteFromDisk(Photo photo)
         {

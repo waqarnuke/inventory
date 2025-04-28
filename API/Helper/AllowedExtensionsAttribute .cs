@@ -11,8 +11,8 @@ namespace API.Helper
             _extesions = extesions;
         }
 
-        protected override ValidationResult IsValid(
-            object value, ValidationContext validationContext)
+        protected override ValidationResult? IsValid(
+            object? value, ValidationContext validationContext)
         {
             var file = value as IFormFile;
             

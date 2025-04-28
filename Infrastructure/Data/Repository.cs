@@ -24,7 +24,7 @@ namespace Infrastructure.Data
             _dbSet.Add(entity);
         }
 
-        public Task<T> Get(Expression<Func<T,bool>> filter, string? includeProperties = null)
+        public Task<T?> Get(Expression<Func<T,bool>> filter, string? includeProperties = null)
         {
             //return _context.Set<T>().FindAsync(id)
             IQueryable<T> query = _dbSet;
@@ -37,6 +37,7 @@ namespace Infrastructure.Data
                     query = query.Include(includporp);
                 }
             }
+            
             return query.FirstOrDefaultAsync(); 
         }
         
@@ -83,7 +84,7 @@ namespace Infrastructure.Data
             _dbSet.RemoveRange(entity);
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(int id)
         {
             return await _context.Set<T>().FindAsync(id);  
         }
@@ -93,8 +94,8 @@ namespace Infrastructure.Data
             return await _context.Set<T>().ToListAsync();  
         }
 
-        public async Task<PagedResult<T>> GetPagination(int index, int size, string orderBy = null, bool ascending = true, 
-                                                        string includeProperties = null,Expression<Func<T,bool>> filter = null)
+        public async Task<PagedResult<T>> GetPagination(int index, int size, string? orderBy = null, bool ascending = true, 
+                                                        string? includeProperties = null,Expression<Func<T,bool>>? filter = null)
         {
             IQueryable<T> query = _dbSet;
 

@@ -7,6 +7,6 @@ namespace API.Dtos
     {
         [MaxFileSize (2 * 1024 * 1024)]
         [AllowedExtensions(new[] {".jpg", ".png", ".jpeg"})]
-        public IFormFile file { get; set; }
+        public IFormFile? file { get; set; }
     }
 }

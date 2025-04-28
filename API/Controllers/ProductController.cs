@@ -11,7 +11,6 @@ namespace API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IPhotoService _photoService;
         private readonly IWebHostEnvironment _evn;
 
         public ProductController(IUnitOfWork unitOfWork,IMapper mapper, IPhotoService photoService,IWebHostEnvironment env)
@@ -34,7 +33,7 @@ namespace API.Controllers
         public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
         {
             var product  = await _unitOfWork.productRepository.Get(p => p.Id == id,includeProperties:"Category,Photos");
-
+            if(product == null) return NotFound(new ApiResponse(404,"Product not found"));
             return _mapper.Map<Product,ProductToReturnDto>(product);
         }
 
@@ -57,6 +56,8 @@ namespace API.Controllers
         {
             var product = await _unitOfWork.productRepository.Get(p => p.Id == id);
             
+            if(product == null) return NotFound(new ApiResponse(404,"Product not found"));
+            
             _mapper.Map(productToUpdate,product);
 
             _unitOfWork.productRepository.Update(product);
@@ -73,6 +74,8 @@ namespace API.Controllers
         {
             var product = await _unitOfWork.productRepository.Get(p => p.Id == id);
 
+            if(product == null) return NotFound(new ApiResponse(404,"Product not found"));
+            
             _unitOfWork.productRepository.Remove(product);
 
             var result = await _unitOfWork.Save();
@@ -86,8 +89,12 @@ namespace API.Controllers
         public async Task<ActionResult<ProductToReturnDto>> AddProductPhoto(int id, [FromForm] ProductPhotoDto photoDto)
         {
             var photo = new Photo();
+
             var product = await _unitOfWork.productRepository.Get(p => p.Id == id);
-            if(photoDto.file.Length > 0)
+
+            if(product == null) return NotFound(new ApiResponse(404,"Product not found"));
+
+            if(photoDto != null && photoDto?.file?.Length > 0)
             {
                 //var photo = await _photoService.SaveToDiskAsync(photoDto.file);
                 //start
@@ -129,12 +136,15 @@ namespace API.Controllers
                 if(postedFile != null)
                 {
                     string fileName = postedFile.FileName;
-                   
+                    
                     var oldfile = await _unitOfWork.productRepository.Get(p => p.ImageUrl ==  fileName);
+
+                    if(oldfile == null) return BadRequest(new ApiResponse(400, "Problem adding photo product"));
+                    
                     string val = _evn.ContentRootPath + "/Content/images/products/";
                     if(oldfile != null)
                     {
-                        string oldImagePath = Path.Combine(val, oldfile.ImageUrl.ToString());
+                        string oldImagePath = Path.Combine(val, oldfile.ImageUrl ?? "");
                         if(System.IO.File.Exists(oldImagePath))
                         {
                             System.IO.File.Delete(oldImagePath); 

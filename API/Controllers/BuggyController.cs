@@ -28,9 +28,9 @@ namespace API.Controllers
         {
             var thing = _context.Categories.Find(42);
             
-            var thingToReturn = thing.ToString();
+            var thingToReturn = thing?.ToString() ?? string.Empty;
             
-            return Ok();
+            return Ok(thingToReturn);
         }
 
         [HttpGet("badrequest")]

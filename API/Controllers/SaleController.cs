@@ -38,7 +38,7 @@ namespace API.Controllers
                 newSale.TransactionId = Guid.NewGuid().ToString();
 
             // Check if product exists and has enough stock
-            var product = await _unitOfWork.itemRepository.Get(x => x.Title.ToLower() == newSale.Title.ToLower());
+            var product = await _unitOfWork.itemRepository.Get(x => (x.Title ?? "").ToLower() == (newSale.Title ?? "").ToLower());
             if (product == null || product.Stock < newSale.Quantity)
                 return BadRequest($"Not enough stock available for {newSale.Title}.");
 
@@ -53,7 +53,7 @@ namespace API.Controllers
                 PricePerUnit = newSale.PricePerUnit,
                 TotalPrice = newSale.Quantity * newSale.PricePerUnit,
                 TransactionId = newSale.TransactionId,
-                PaymentMethod = newSale.PaymentMethod,
+                PaymentMethod = newSale.PaymentMethod ?? "",
                 LocationId = newSale.LocationId
             };
             // Temporarily store item in cart
@@ -76,7 +76,7 @@ namespace API.Controllers
 
             // Get register balance
             var getRegister = await _unitOfWork.registerRepository.GetAll() ;
-            Register register = getRegister.FirstOrDefault();
+            Register register = getRegister.FirstOrDefault() ?? new Register();
             if (register == null)
             {
                 return BadRequest("Register not found.");
@@ -125,7 +125,7 @@ namespace API.Controllers
             var totalAmount = itemsSale.Items.Sum(i => i.Quantity * i.PricePerUnit);
 
             var getRegister = await _unitOfWork.registerRepository.GetAll();
-            Register register = getRegister.FirstOrDefault();
+            Register register = getRegister.FirstOrDefault() ?? new Register();
 
             if (register == null)
             {
@@ -175,7 +175,7 @@ namespace API.Controllers
         }
         
         [HttpGet("get-sale-by-transaction")]
-        public async Task<ActionResult<PagedResultDto<SaleTransactionDto>>> GetSaleByTransaction(int LocationId,int index, int size, string orderBy = null, bool ascending = true,string search = null)
+        public async Task<ActionResult<PagedResultDto<SaleTransactionDto>>> GetSaleByTransaction(int LocationId,int index, int size, string? orderBy = null, bool ascending = true,string? search = null)
         {
             var today = DateTime.UtcNow.Date;
             var sale = await _unitOfWork.saleRepository.GetAllById(x=>x.LocationId == LocationId, includeProperties: "Items,Location");
@@ -195,9 +195,9 @@ namespace API.Controllers
                     Items = g.Select(s => new ItemToReturnDto
                     {
                         Id = s.ItemId,
-                        Title = s.Items.Title,
+                        Title = s.Items != null ? s.Items.Title : string.Empty,
                         Stock = s.Quantity,
-                        Price = s.Items.Price
+                        Price = s.Items != null ? s.Items.Price : 0,
                     }).ToList()
                 }).OrderByDescending(s => s.SaleDate).ToList();
 

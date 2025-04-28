@@ -14,5 +14,5 @@ public class Image
     public string? UserId { get; set; }
     [ForeignKey("Item")]
     public int? ItemId { get; set; }
-    public Item Item { get; set; }
+    public Item? Item { get; set; }
 }
