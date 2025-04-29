@@ -21,7 +21,7 @@ namespace API.Controllers
         public async Task<ActionResult<List<Location>>> GetLocations()
         {
             var locations = await _unitOfWork.locationRepository.GetAll();
-             if (locations == null || !locations.Any() ) return NotFound(new ApiResponse(404));
+            if (locations == null || !locations.Any() ) return NotFound(new ApiResponse(404));
 
             return Ok(locations);
         }

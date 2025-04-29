@@ -16,15 +16,15 @@ namespace API.Controllers
         [Authorize]
         [HttpGet("summary")]
         //[Authorize]
-        public async Task<IActionResult> GetDashboardSummary()
+        public async Task<IActionResult> GetDashboardSummary(int locationId)
         {
-            var getAllSale = await _unitOfWork.saleRepository.GetAll();
+            var getAllSale = await _unitOfWork.saleRepository.GetAllById(x => x.LocationId ==locationId); 
             var totalSales = getAllSale.Sum(x => x.TotalPrice);
 
-            var getAllBuying = await _unitOfWork.buyingRepository.GetAll();
+            var getAllBuying = await _unitOfWork.buyingRepository.GetAllById(x => x.LocationId ==locationId); 
             var totalBuying  = getAllBuying.Sum(x => x.TotalPrice);
 
-            var cashBalance = await _unitOfWork.registerRepository.GetAll();  
+            var cashBalance = await _unitOfWork.registerRepository.GetAllById(x => x.LocationId ==locationId);  
 
             // Simulate fetching data from a service or database
             var summary = new DashboardSummaryDto

@@ -32,7 +32,11 @@ namespace Infrastructure.Data
             //     .WithOne()
             //     .HasForeignKey(i => i.ItemId)
             //     .OnDelete(DeleteBehavior.Cascade); 
-
+            // modelBuilder.Entity<Location>()
+            //             .HasOne(l => l.Company)
+            //             .WithMany(c => c.Locations)
+            //             .HasForeignKey(l => l.CompanyId)
+            //             .OnDelete(DeleteBehavior.Cascade); 
             
             modelBuilder.Entity<Company>().HasData(
                 new Company{Id=1, Name="Abc"}
@@ -200,7 +204,7 @@ namespace Infrastructure.Data
             );
 
             modelBuilder.Entity<Register>().HasData(
-                new Register{Id=1, CardBalance=10000,CashBalance=100000}
+                new Register{Id=1, CardBalance=10000,CashBalance=100000,LocationId=1}
             );
 
             modelBuilder.Entity<Sale>().HasData(

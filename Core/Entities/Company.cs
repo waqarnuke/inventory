@@ -8,5 +8,6 @@ public class Company :BaseEntity
     [Required]
     [MaxLength(100)]
     public string Name { get; set; } = string.Empty;
-    public ICollection<Location>? Stores { get; set; }
+    public string? UserId { get; set; }
+    public ICollection<Location>? Locations { get; set; } = new List<Location>();
 }

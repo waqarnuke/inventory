@@ -18,6 +18,7 @@ namespace Infrastructure.Data
         public IModelRepository modelRepository {get; private set;}
         public ISaleRepository saleRepository {get; private set;}
         public ISupplierRepository supplierRepository {get; private set;}
+        public ICompanyRepository companyRepository {get; private set;}
 
         public UnitOfWork(StoreContext context)
         {
@@ -37,6 +38,7 @@ namespace Infrastructure.Data
             registerRepository = new RegisterRepository(_context);
             saleRepository = new SaleRepository(_context);
             supplierRepository = new SupplierRepository(_context);
+            companyRepository = new CompanyRepository(_context);    
         }
         public async Task<int> Save()
         {
