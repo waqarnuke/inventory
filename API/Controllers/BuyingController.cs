@@ -256,10 +256,10 @@ namespace API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> Serach(int index, int size, string? orderBy = null, bool ascending = true,string? search = null)
+        public async Task<ActionResult<PagedResultDto<ItemToReturnDto>>> Serach(int locationId,int index, int size, string? orderBy = null, bool ascending = true,string? search = null)
         {
             // ✅ Optional filter setup
-            Expression<Func<Buying, bool>>? filter = null;
+            Expression<Func<Buying, bool>>? filter = x => x.LocationId == locationId;
             if (!string.IsNullOrWhiteSpace(search))
             {
                 filter = x => x.Items != null && x.Items.Title != null && x.Items.Title.Contains(search);

@@ -307,7 +307,11 @@ namespace API.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> SearchProducts(string query)
         {
-            var items  = await _unitOfWork.itemRepository.GetAllById(p => p.Title.Contains(query) || p.EMI == query,includeProperties:"Brand,Model,Location,MobileNetwork,Storage,ItemType,Images");
+            if (string.IsNullOrWhiteSpace(query)) return BadRequest(new ApiResponse(400,"Query cannot be empty"));
+            
+            var items  = await _unitOfWork.itemRepository.GetAllById(p => p.Title.ToLower().Contains(query.ToLower()) || p.EMI == query,includeProperties:"Brand,Model,Location,MobileNetwork,Storage,ItemType,Images");
+
+            if (items == null || !items.Any()) return NotFound(new ApiResponse(404,"Item not found"));
 
             var itemToReturn = _mapper.Map<IEnumerable<Item>, IEnumerable<ItemToReturnDto>>(items);;
             
