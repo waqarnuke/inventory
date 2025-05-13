@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Core.Entities;
 using Core.Interface;
 
@@ -12,19 +8,18 @@ namespace Infrastructure.Data
         private readonly StoreContext _context;
         public LocationRepository(StoreContext context) : base(context)
         {
-             _context = context;
+            _context = context;
 
         }
 
         public bool IsExists(int id)
         {
-           return _context.Locations.Any(x => x.Id == id);        }
+            return _context.Locations.Any(x => x.Id == id);        
+        }
 
         public void Update(Location location)
         {
-           _context.Locations.Update(location);
+            _context.Locations.Update(location);
         }
-
-        
     }
 }

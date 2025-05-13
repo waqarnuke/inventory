@@ -24,15 +24,39 @@ namespace API.Controllers
             {
                 Id = company.Id,
                 CompanyName = company.Name,
+                UserId = company.UserId,
                 Locations =  company.Locations != null ?  company.Locations.Select(l => new LocationDto
                 {
                     Id = l.Id,
-                    LocationName = l.Name
+                    Name = l.Name
                 }).ToList()
                 : null
             };
 
             return Ok(companyDto);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<CompanyDto>> UpdateItem(CompanyDto company)
+        {    
+            var existingCompnay = await _unitOfWork.companyRepository.Get(x => x.Id == company.Id);
+            
+            if(existingCompnay == null) return NotFound(new ApiResponse(404));
+
+            // Update only specific columns
+            if(company != null)
+            {
+                existingCompnay.Name = company.CompanyName ?? "Company";
+                existingCompnay.UserId = company.UserId ;
+            }
+            
+            _unitOfWork.companyRepository.Update(existingCompnay);
+            
+            var result = await _unitOfWork.Save();
+            
+            if(result <= 0) return  BadRequest(new ApiResponse(400, "Problem updating location"));
+
+            return Ok(result);
         }
     }
 }

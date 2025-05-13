@@ -53,8 +53,13 @@ namespace API.Controllers
             if(!IsExists(id))
                 return BadRequest("Cannot update this item detail");
                 
+            var existingLocation = await _unitOfWork.locationRepository.Get(x => x.Id == id);
+            if(existingLocation == null) return NotFound(new ApiResponse(404));
+
+            // Update only specific columns
+            existingLocation.Name = location.Name;
             
-            _unitOfWork.locationRepository.Update(location);
+            _unitOfWork.locationRepository.Update(existingLocation);
             
             var result = await _unitOfWork.Save();
             
