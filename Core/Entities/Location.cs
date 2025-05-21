@@ -12,7 +12,7 @@ public class Location
         [Column(TypeName = "nvarchar(100)")]
         public string Name { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
-        [ForeignKey("Item")]
+        [ForeignKey("CompanyId")]
         public int CompanyId { get; set; }  // Foreign Key
         public Company? Company { get; set; }  // Navigation Property
 }

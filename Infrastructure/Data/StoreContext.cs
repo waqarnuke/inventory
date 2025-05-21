@@ -25,6 +25,7 @@ namespace Infrastructure.Data
         public DbSet<Sale> Sales { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Company> Companies { get; set; }
+        public DbSet<UserLocationAssignment> UserLocationAssignments  { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {   
             // modelBuilder.Entity<Item>()

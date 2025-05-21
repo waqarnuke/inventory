@@ -1,4 +1,6 @@
+using API.Dtos.Company;
 using API.Dtos.Item;
+using API.Dtos.UserLocationAssignment;
 using API.Errors;
 using AutoMapper;
 using Core.Entities;
@@ -36,9 +38,38 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Location>> CreateItem(Location location)
+        public async Task<ActionResult<Location>> CreateItem(LocationAssignmentDto locationDto)
         {
-            _unitOfWork.locationRepository.Add(location);
+            var existingLocation = await _unitOfWork.locationRepository.Get(x => x.Name == locationDto.Name);
+            if(existingLocation != null) return BadRequest(new ApiResponse(400, "Location already exists"));
+
+            var newLocation = new Location
+            {
+                Name = locationDto.Name,
+                Address = locationDto.Address,
+                CompanyId = locationDto.CompanyId,
+            };
+            _unitOfWork.locationRepository.Add(newLocation);
+            
+            var locresult = await _unitOfWork.Save();
+            if(locresult > 0)
+            {
+                var newLocationAssignment = new UserLocationAssignment
+                {
+                    UserId = locationDto.CreatedById ?? "User",
+                    LocationId = newLocation.Id,
+                    Email = locationDto.Email,
+                    FirstName = locationDto.FirstName,
+                    LastName = locationDto.LastName,
+                    CreatedUser= locationDto.FirstName + " " + locationDto.LastName,
+                    CreatedTime = DateTime.UtcNow,
+                    CreatedById = locationDto.CreatedById
+                    
+                };
+                
+                _unitOfWork.userLocationAssignmentsRepository.Add(newLocationAssignment);
+            }
+            
             
             var result = await _unitOfWork.Save();
             

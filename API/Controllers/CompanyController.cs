@@ -1,6 +1,7 @@
 using API.Dtos.Company;
 using API.Errors;
 using Core.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -13,6 +14,7 @@ namespace API.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult> GetCompanies(string userid)
         {
