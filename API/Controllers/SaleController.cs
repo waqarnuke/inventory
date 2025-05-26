@@ -124,8 +124,11 @@ namespace API.Controllers
 
             var totalAmount = itemsSale.Items.Sum(i => i.Quantity * i.PricePerUnit);
 
-            var getRegister = await _unitOfWork.registerRepository.GetAll();
-            Register register = getRegister.FirstOrDefault() ?? new Register();
+            if (itemsSale.LocationId == null || itemsSale.LocationId <= 0)
+                return BadRequest("Invalid location ID.");
+
+            var getRegister = await _unitOfWork.saleRegisterRepository.GetAllById(x => x.LocationId == itemsSale.LocationId);
+            BaseRegister register = getRegister.FirstOrDefault() ?? new BaseRegister();
 
             if (register == null)
             {
@@ -134,11 +137,11 @@ namespace API.Controllers
             
             if (itemsSale.PaymentMethod == "Cash")
             {
-                register.CashBalance += totalAmount;
+                register.Cash += totalAmount;
             }
             else if (itemsSale.PaymentMethod == "Card")
             {
-                register.CardBalance += totalAmount;
+                register.Card += totalAmount;
             }
             else
             {

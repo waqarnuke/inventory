@@ -99,12 +99,12 @@ namespace API.Controllers
         [HttpGet("getAssignedLocations")]
         public async Task<IActionResult> GetAssignedLocations(string createdById)
         {
-            if (string.IsNullOrEmpty(createdById)) return NotFound();
+            if (string.IsNullOrEmpty(createdById)) return NoContent();
 
             var assignedLocation = await _unitOfWork.userLocationAssignmentsRepository.GetAllById(x => x.CreatedById == createdById);
 
-            if (assignedLocation == null || !assignedLocation.Any()) return NotFound(new ApiResponse(404));
-
+            if (assignedLocation == null || !assignedLocation.Any()) return NoContent();
+            
             return Ok(assignedLocation);
         }
 

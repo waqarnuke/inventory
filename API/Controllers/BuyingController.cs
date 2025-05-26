@@ -172,12 +172,9 @@ namespace API.Controllers
             }).ToList();
             if (buying == null || !buying.Any())
                 return BadRequest("No items to confirm.");
+
             _unitOfWork.buyingRepository.AddRange(buying);
             int resultBuy = await _unitOfWork.Save();
-
-            // if(resultBuy <= 0) return  BadRequest(new ApiResponse(400, "Problem creating Buying item"));
-
-            //return Ok(new { Message = "Item added", TransactionId = getTransId });
 
             var cartItems = await _unitOfWork.buyingRepository.GetAllById(x => x.TransactionId == getTransId);
 
@@ -185,11 +182,14 @@ namespace API.Controllers
                 return BadRequest("Cart is empty or transaction ID is invalid.");
 
             // Calculate total amount
-            decimal totalAmount = cartItems.Sum(item => item.TotalPrice ?? 0);  
+            decimal totalAmount = cartItems.Sum(item => item.TotalPrice ?? 0);
 
             // Get register balance
-            var getRegister = await _unitOfWork.registerRepository.GetAll() ;
-            Register register = getRegister.FirstOrDefault() ?? new Register();;
+            if (itemsPurchases?.LocationId == null)
+                return BadRequest("Location ID is required.");
+
+            var getRegister = await _unitOfWork.buyRegisterRepository.GetAllById(x => x.LocationId == itemsPurchases.LocationId);
+            BuyRegister register = getRegister.FirstOrDefault() ?? new BuyRegister();;
 
             if (register == null)
             {
@@ -198,15 +198,15 @@ namespace API.Controllers
             // Deduct amount based on payment method
             if (itemsPurchases != null && itemsPurchases.PaymentMethod == "Cash")
             {
-                if (register.CashBalance < totalAmount)
+                if (register.Cash < totalAmount)
                     return BadRequest("Insufficient Cash Balance.");
-                register.CashBalance -= totalAmount;
+                register.Cash -= totalAmount;
             }
             else if (itemsPurchases != null && itemsPurchases.PaymentMethod == "Card")
             {
-                if (register.CardBalance < totalAmount)
+                if (register.Card < totalAmount)
                     return BadRequest("Insufficient Card Balance.");
-                register.CardBalance -= totalAmount;
+                register.Card -= totalAmount;
             }
             else
             {

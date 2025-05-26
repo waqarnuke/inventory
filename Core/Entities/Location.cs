@@ -7,7 +7,7 @@ namespace Core.Entities;
 public class Location
 {
         [Key]
-        public int Id { get; set; } 
+        public int Id { get; set; }
         [Required]
         [Column(TypeName = "nvarchar(100)")]
         public string Name { get; set; } = string.Empty;
@@ -15,4 +15,8 @@ public class Location
         [ForeignKey("CompanyId")]
         public int CompanyId { get; set; }  // Foreign Key
         public Company? Company { get; set; }  // Navigation Property
+        public BuyRegister? BuyRegister { get; set; }
+        public SaleRegister? SellRegister { get; set; }
+        
+        
 }

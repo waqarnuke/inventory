@@ -22,6 +22,8 @@ namespace Core.Interface
         ISupplierRepository supplierRepository {get;}
         ICompanyRepository companyRepository {get;}
         IUserLocationAssignmentsRepository userLocationAssignmentsRepository {get;}
+        IBuyRegisterRepository buyRegisterRepository {get;}
+        ISaleRegisterRepository saleRegisterRepository {get;}
         Task<int> Save();
     }
 }

@@ -19,8 +19,9 @@ namespace Infrastructure.Data
         public ISaleRepository saleRepository {get; private set;}
         public ISupplierRepository supplierRepository {get; private set;}
         public ICompanyRepository companyRepository {get; private set;}
-
-        public IUserLocationAssignmentsRepository userLocationAssignmentsRepository {get; private set;}
+        public IUserLocationAssignmentsRepository userLocationAssignmentsRepository { get; private set; }
+        public IBuyRegisterRepository buyRegisterRepository { get; private set; }
+        public ISaleRegisterRepository saleRegisterRepository { get; private set; }
 
         public UnitOfWork(StoreContext context)
         {
@@ -28,20 +29,22 @@ namespace Infrastructure.Data
             categoryRepository = new CategoryRepository(_context);
             productRepository = new ProductRepository(_context);
             itemRepository = new ItemRepository(_context);
-            
+
             brandRepository = new BrandRepository(_context);
             mobileNetworkRepository = new MobileNetworkRepository(_context);
             storageRepository = new StorageRepository(_context);
             modelRepository = new ModelRepository(_context);
             locationRepository = new LocationRepository(_context);
-            
+
             imageRepository = new ImageRepository(_context);
             buyingRepository = new BuyingRepository(_context);
             registerRepository = new RegisterRepository(_context);
             saleRepository = new SaleRepository(_context);
             supplierRepository = new SupplierRepository(_context);
-            companyRepository = new CompanyRepository(_context);  
-            userLocationAssignmentsRepository = new UserLocationAssignmentsRepository(_context);  
+            companyRepository = new CompanyRepository(_context);
+            userLocationAssignmentsRepository = new UserLocationAssignmentsRepository(_context);
+            buyRegisterRepository = new BuyRegisterRepository(_context);
+            saleRegisterRepository = new SaleRegisterRepository(_context);
         }
         public async Task<int> Save()
         {

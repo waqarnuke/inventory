@@ -18,6 +18,9 @@ namespace API.Controllers
         //[Authorize]
         public async Task<IActionResult> GetDashboardSummary(int locationId)
         {
+            var buyingRegister = await _unitOfWork.buyRegisterRepository.GetAllById(x => x.LocationId == locationId);
+            var selingRegister = await _unitOfWork.saleRegisterRepository.GetAllById(x => x.LocationId == locationId);
+
             var getAllSale = await _unitOfWork.saleRepository.GetAllById(x => x.LocationId ==locationId); 
             var totalSales = getAllSale.Sum(x => x.TotalPrice);
 
@@ -32,7 +35,9 @@ namespace API.Controllers
                 TotalSales = totalSales,
                 TotalBuying = totalBuying ?? 0,
                 RegisterCashBalance = cashBalance.Select(x => x.CashBalance).Sum(),
-                RegisterCardBalance = 3000.00m
+                RegisterCardBalance = 3000.00m, // This could be fetched from a service or database
+                BuyingRegister = buyingRegister.Select(x => x.Cash).Sum() ?? 0,
+                SelingRegister = selingRegister.Select(x => x.Cash).Sum() ?? 0,
             };
 
             return Ok(summary);
